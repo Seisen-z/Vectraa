@@ -21,6 +21,7 @@ let nc = 0;
 const nextNeon = (): Neon => NEON[nc++ % NEON.length];
 
 function assignCat(name: string): string {
+  if (name.match(/unique|abstract|random|geometry|pattern/)) return 'unique';
   if (name.toLowerCase().startsWith('role-') || name.match(/admin|staff|vip|moderator|support|role|manager|director|employee|user|users|premium|buyer|owner|developer|member/)) return 'roles';
   if (name.match(/heart|smile|face|sad|laugh|cry|angry|person|people|boy|girl/)) return 'emotions';
   if (name.match(/home|settings|search|menu|check|x|plus|minus|zoom|grid|list|filter|sort/)) return 'ui-controls';
@@ -43,7 +44,6 @@ function assignCat(name: string): string {
   if (name.match(/file|document|pdf|doc|xls|ppt|txt|csv|json|xml|html|css|js|ts|zip|folder|upload|download|copy|paste/)) return 'file-types';
   if (name.match(/accessibility|disability|wheelchair|blind|deaf|hearing|visual|braille|sign|caption|subtitle|inclusive/)) return 'accessibility';
   if (name.match(/sport|football|soccer|basketball|tennis|baseball|golf|swim|run|gym|fitness|trophy|medal|game|play|team|athlete|race/)) return 'sports';
-  if (name.match(/unique|abstract|random|geometry|pattern/)) return 'unique';
 
   const fallbacks = ['ui-controls', 'technology', 'business', 'communication', 'nature', 'arrows', 'shopping', 'data', 'social-media', 'file-types', 'accessibility', 'sports', 'brands', 'unique'];
   let hash = 0;
