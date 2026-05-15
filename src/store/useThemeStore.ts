@@ -27,7 +27,7 @@ export const useThemeStore = create<ThemeState>()(
       },
     }),
     {
-      name: 'ikonix-theme',
+      name: 'vectra-theme',
       onRehydrateStorage: () => (state) => {
         if (state) applyTheme(state.theme);
       },

@@ -61,7 +61,7 @@ export default function Header({ onMobileMenuToggle }: Props) {
           </svg>
         </div>
         <span className="hidden sm:block text-base font-bold text-[var(--text-primary)] tracking-tight">
-          Ikon<span style={{ color: 'var(--neon-blue)' }}>ix</span>
+          Vec<span style={{ color: 'var(--neon-blue)' }}>tra</span>
         </span>
       </div>
 
