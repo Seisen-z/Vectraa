@@ -27,7 +27,7 @@ export const useThemeStore = create<ThemeState>()(
       },
     }),
     {
-      name: 'iconvault-theme',
+      name: 'ikonix-theme',
       onRehydrateStorage: () => (state) => {
         if (state) applyTheme(state.theme);
       },

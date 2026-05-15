@@ -199,5 +199,5 @@ export async function bulkDownloadZip(
   }
 
   const content = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-  saveAs(content, `iconvault-icons-${Date.now()}.zip`);
+  saveAs(content, `ikonix-icons-${Date.now()}.zip`);
 }
