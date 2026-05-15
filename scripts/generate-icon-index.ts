@@ -43,8 +43,9 @@ function assignCat(name: string): string {
   if (name.match(/file|document|pdf|doc|xls|ppt|txt|csv|json|xml|html|css|js|ts|zip|folder|upload|download|copy|paste/)) return 'file-types';
   if (name.match(/accessibility|disability|wheelchair|blind|deaf|hearing|visual|braille|sign|caption|subtitle|inclusive/)) return 'accessibility';
   if (name.match(/sport|football|soccer|basketball|tennis|baseball|golf|swim|run|gym|fitness|trophy|medal|game|play|team|athlete|race/)) return 'sports';
+  if (name.match(/unique|abstract|random|geometry|pattern/)) return 'unique';
 
-  const fallbacks = ['ui-controls', 'technology', 'business', 'communication', 'nature', 'arrows', 'shopping', 'data', 'social-media', 'file-types', 'accessibility', 'sports', 'brands'];
+  const fallbacks = ['ui-controls', 'technology', 'business', 'communication', 'nature', 'arrows', 'shopping', 'data', 'social-media', 'file-types', 'accessibility', 'sports', 'brands', 'unique'];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
   return fallbacks[hash % fallbacks.length];

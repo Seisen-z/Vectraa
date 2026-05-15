@@ -171,6 +171,13 @@ export const CATEGORIES: Category[] = [
     description: 'Admin, support, staff, and user levels',
     keywords: ['role', 'user', 'admin', 'support', 'staff', 'manager', 'owner', 'guest', 'member', 'moderator', 'agent', 'client', 'customer', 'employee', 'boss', 'team', 'group', 'vip', 'superadmin'],
   },
+  {
+    id: 'unique',
+    label: 'Unique & Abstract',
+    emoji: '✨',
+    description: 'Random, unique, and abstract shapes',
+    keywords: ['unique', 'random', 'abstract', 'shape', 'weird', 'misc', 'creative', 'art', 'pattern', 'geometry'],
+  },
 ];
 
 /** Map for O(1) category lookup */
