@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * imageConverter.ts
  * Advanced modular conversion engine supporting native canvas and WASM decoders.
@@ -41,7 +42,8 @@ export async function convertImage(file: File, targetFormat: string): Promise<Bl
         formData.append('sourceFormat', sourceExt);
         formData.append('targetFormat', targetExt);
 
-        const response = await fetch('http://localhost:3000/api/convert', {
+        const API_BASE = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:3000';
+        const response = await fetch(`${API_BASE}/api/convert`, {
           method: 'POST',
           body: formData
         });

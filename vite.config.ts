@@ -17,7 +17,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
-          icons: ['lucide-react'],
           utils: ['jszip', 'file-saver', 'fuse.js'],
           window: ['react-window', 'react-virtualized-auto-sizer'],
         },
