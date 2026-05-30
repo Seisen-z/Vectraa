@@ -1,7 +1,4 @@
-/**
- * IconModal.tsx — Fixed for v3 ManifestEntry short keys + color support.
- */
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import type { DownloadFormat, PngSize } from '@/data/iconTypes';
 import { useIconStore, type ManifestEntry } from '@/store/useIconStore';
 import { downloadIcon } from '@/utils/download';
@@ -9,14 +6,27 @@ import { CATEGORY_MAP } from '@/data/categories';
 import { NEON_HEX } from '@/data/iconTypes';
 
 interface Props { entry: ManifestEntry; onClose: () => void; }
+
 const PNG_SIZES: PngSize[] = [16, 32, 64, 128, 256, 512];
+const ALL_FORMATS: { value: DownloadFormat; label: string }[] = [
+  { value: 'svg',  label: 'SVG'  },
+  { value: 'png',  label: 'PNG'  },
+  { value: 'jpg',  label: 'JPG'  },
+  { value: 'webp', label: 'WEBP' },
+  { value: 'ico',  label: 'ICO'  },
+  { value: 'json', label: 'JSON' },
+];
+const SIZED_FORMATS: DownloadFormat[] = ['png', 'jpg', 'webp'];
 
 export default function IconModal({ entry, onClose }: Props) {
   const { getIcon, ensureChunksLoaded, iconColor, showBorder } = useIconStore();
-  const icon        = getIcon(entry.id);
-  const neonColor   = NEON_HEX[entry.l] ?? '#00B4FF';
-  const svgColor    = iconColor || neonColor;
-  const category    = CATEGORY_MAP.get(entry.c);
+  const icon      = getIcon(entry.id);
+  const neonColor = NEON_HEX[entry.l] ?? '#00B4FF';
+  const svgColor  = iconColor || neonColor;
+  const category  = CATEGORY_MAP.get(entry.c);
+
+  const [format, setFormat]       = useState<DownloadFormat>('png');
+  const [noBorder, setNoBorder]   = useState(false);
 
   useEffect(() => { ensureChunksLoaded([entry.k]); }, [entry.k, ensureChunksLoaded]);
   useEffect(() => {
@@ -25,10 +35,13 @@ export default function IconModal({ entry, onClose }: Props) {
     return () => window.removeEventListener('keydown', h);
   }, [onClose]);
 
-  const dl = useCallback(async (fmt: DownloadFormat, size?: PngSize) => {
+  const dl = useCallback(async (size?: PngSize) => {
     if (!icon) return;
-    await downloadIcon(icon, fmt, size ?? 512, svgColor, showBorder);
-  }, [icon, svgColor, showBorder]);
+    const effectiveBorder = noBorder ? false : showBorder;
+    await downloadIcon(icon, format, size ?? 512, svgColor, effectiveBorder);
+  }, [icon, format, svgColor, showBorder, noBorder]);
+
+  const hasSizes = SIZED_FORMATS.includes(format);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}>
@@ -63,31 +76,83 @@ export default function IconModal({ entry, onClose }: Props) {
         </div>
 
         {/* Downloads */}
-        <div className="px-6 pb-6 space-y-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Vector & Data</p>
-            <div className="flex gap-2 flex-wrap">
-              {(['svg','ico','json'] as DownloadFormat[]).map(fmt => (
-                <button key={fmt} onClick={() => dl(fmt)} disabled={!icon} className="btn btn-ghost text-xs uppercase disabled:opacity-40" style={{ minWidth: 56 }}>{fmt.toUpperCase()}</button>
-              ))}
+        <div className="px-6 pb-6 space-y-4">
+          {/* Format selector + border toggle */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5">Format</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {ALL_FORMATS.map(f => (
+                  <button
+                    key={f.value}
+                    onClick={() => setFormat(f.value)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors"
+                    style={format === f.value ? {
+                      borderColor: neonColor,
+                      color: neonColor,
+                      background: `${neonColor}15`,
+                    } : {
+                      borderColor: 'rgba(255,255,255,0.1)',
+                      color: 'var(--text-secondary)',
+                      background: 'rgba(255,255,255,0.03)',
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">PNG</p>
-            <div className="flex gap-2 flex-wrap">
-              {PNG_SIZES.map(size => (
-                <button key={size} onClick={() => dl('png', size)} disabled={!icon} className="btn btn-ghost text-xs disabled:opacity-40" style={{ minWidth: 56 }}>{size}px</button>
-              ))}
+
+          {/* Border toggle */}
+          <label className="flex items-center gap-2 cursor-pointer w-fit select-none">
+            <div
+              onClick={() => setNoBorder(v => !v)}
+              className="w-8 h-4 rounded-full relative transition-colors"
+              style={{ background: noBorder ? `${neonColor}40` : 'rgba(255,255,255,0.1)' }}
+            >
+              <div
+                className="absolute top-0.5 w-3 h-3 rounded-full transition-all"
+                style={{
+                  left: noBorder ? '18px' : '2px',
+                  background: noBorder ? neonColor : 'rgba(255,255,255,0.4)',
+                }}
+              />
             </div>
-          </div>
+            <span className="text-xs text-[var(--text-secondary)]">Without border</span>
+          </label>
+
+          {/* Size buttons or single download */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Raster 512px</p>
-            <div className="flex gap-2">
-              {(['jpg','webp'] as DownloadFormat[]).map(fmt => (
-                <button key={fmt} onClick={() => dl(fmt, 512)} disabled={!icon} className="btn btn-ghost text-xs uppercase disabled:opacity-40" style={{ minWidth: 64 }}>{fmt.toUpperCase()}</button>
-              ))}
-            </div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">
+              {hasSizes ? 'Select Size to Download' : 'Download'}
+            </p>
+            {hasSizes ? (
+              <div className="flex gap-2 flex-wrap">
+                {PNG_SIZES.map(size => (
+                  <button
+                    key={size}
+                    onClick={() => dl(size)}
+                    disabled={!icon}
+                    className="btn btn-ghost text-xs disabled:opacity-40"
+                    style={{ minWidth: 56 }}
+                  >
+                    {size}px
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button
+                onClick={() => dl()}
+                disabled={!icon}
+                className="btn btn-ghost text-xs uppercase disabled:opacity-40"
+                style={{ minWidth: 80 }}
+              >
+                {format.toUpperCase()}
+              </button>
+            )}
           </div>
+
           {!icon && <p className="text-xs text-[var(--text-muted)] italic">Loading SVG data…</p>}
         </div>
       </div>
