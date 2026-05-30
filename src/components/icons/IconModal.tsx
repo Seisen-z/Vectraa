@@ -137,7 +137,7 @@ export default function IconModal({ entry, onClose }: Props) {
                     className="btn btn-ghost text-xs disabled:opacity-40"
                     style={{ minWidth: 56 }}
                   >
-                    {size}px
+                    {size}x{size}
                   </button>
                 ))}
               </div>
