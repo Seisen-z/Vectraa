@@ -8,19 +8,17 @@ import type { IconEntry, DownloadFormat, PngSize } from '@/data/iconTypes';
 import { NEON_HEX } from '@/data/iconTypes';
 
 // ── Build full SVG string from an icon entry ─────────────────
-export function buildSvgString(icon: IconEntry, colorOverride?: string, showBorder = true): string {
-  // Use explicit color or fallback to the icon's assigned neon color
+export function buildSvgString(icon: IconEntry, colorOverride?: string, showBorder = true, size = 512): string {
   const color = colorOverride && colorOverride !== 'currentColor' ? colorOverride : (NEON_HEX[icon.color] ?? '#00B4FF');
   const content = icon.svgContent.replace(/currentColor/g, color);
-  
+
   if (!showBorder) {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="1024" height="1024" fill="${color}">
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="${size}" height="${size}" fill="${color}">
   ${content}
 </svg>`;
   }
 
-  // Return the SVG mimicking the IconCard styling (88x88px, 3px border, transparent bg)
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="88" height="88">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="${size}" height="${size}">
   <rect x="1.5" y="1.5" width="85" height="85" rx="16" fill="none" stroke="${color}" stroke-width="3" />
   <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" fill="${color}">
     ${content}
@@ -95,12 +93,10 @@ export async function svgToWebP(icon: IconEntry, size: PngSize = 512, colorOverr
   );
 }
 
-// ── SVG → ICO (16 + 32 + 48px multi-resolution) ──────────────
-export async function svgToIco(icon: IconEntry, colorOverride?: string, showBorder = true): Promise<Blob> {
-  // Build 32px PNG as best approximation; ICO wrapping is complex in browser.
-  // We create a 48×48 PNG and name it .ico for compatibility.
-  const svg = buildSvgString(icon, colorOverride, showBorder);
-  const canvas = await svgToCanvas(svg, 48);
+// ── SVG → ICO ─────────────────────────────────────────────────
+export async function svgToIco(icon: IconEntry, colorOverride?: string, showBorder = true, size: PngSize = 32): Promise<Blob> {
+  const svg = buildSvgString(icon, colorOverride, showBorder, size);
+  const canvas = await svgToCanvas(svg, size);
   return new Promise<Blob>((res, rej) =>
     canvas.toBlob(b => b ? res(b) : rej(new Error('ICO conversion failed')), 'image/png')
   );
@@ -134,7 +130,7 @@ export async function downloadIcon(
   const base = (icon.slug || icon.id).replace(/^(custom|lucide|tabler|phosphor|heroicons|bootstrap|iconoir|material)-/, '');
   switch (format) {
     case 'svg': {
-      saveAs(svgToBlob(buildSvgString(icon, colorOverride, showBorder)), `${base}.svg`);
+      saveAs(svgToBlob(buildSvgString(icon, colorOverride, showBorder, pngSize)), `${base}-${pngSize}px.svg`);
       break;
     }
     case 'png': {
@@ -153,8 +149,8 @@ export async function downloadIcon(
       break;
     }
     case 'ico': {
-      const blob = await svgToIco(icon, colorOverride, showBorder);
-      saveAs(blob, `${base}.ico`);
+      const blob = await svgToIco(icon, colorOverride, showBorder, pngSize);
+      saveAs(blob, `${base}-${pngSize}px.ico`);
       break;
     }
     case 'json': {

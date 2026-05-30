@@ -16,7 +16,7 @@ const ALL_FORMATS: { value: DownloadFormat; label: string }[] = [
   { value: 'ico',  label: 'ICO'  },
   { value: 'json', label: 'JSON' },
 ];
-const SIZED_FORMATS: DownloadFormat[] = ['png', 'jpg', 'webp'];
+const SIZED_FORMATS: DownloadFormat[] = ['svg', 'png', 'jpg', 'webp', 'ico'];
 
 export default function IconModal({ entry, onClose }: Props) {
   const { getIcon, ensureChunksLoaded, iconColor, showBorder } = useIconStore();
