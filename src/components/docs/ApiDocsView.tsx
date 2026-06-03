@@ -400,16 +400,15 @@ foreach ($cats as $c) {
               { name: 'id', type: 'string', required: true, desc: 'The icon id as returned by the list endpoint (e.g. a-arrow-down).' },
             ]}
             response={`{
-  "id":         "custom-outline-a-arrow-down",
-  "iconName":   "a-arrow-down",
-  "name":       "A Arrow Down",
-  "category":   "arrows",
-  "tags":       ["a", "arrow", "down", "letter", "font", "text"],
-  "style":      "outline",
-  "source":     "custom",
-  "viewBox":    "0 0 24 24",
-  "color":      "blue",
-  "svgContent": "<path d=\\"M2 18H9\\"/><path d=\\"M12 18L22 18\\"/><path d=\\"M19 15L22 18L19 21\\"/><path d=\\"M5 10.5L9 3L13 10.5\\"/><path d=\\"M5.7 9H12.3\\"/>"
+  "id":       "custom-outline-a-arrow-down",
+  "iconName": "a-arrow-down",
+  "name":     "A Arrow Down",
+  "category": "arrows",
+  "tags":     ["a", "arrow", "down", "letter", "font"],
+  "style":    "outline",
+  "source":   "custom",
+  "viewBox":  "0 0 24 24",
+  "color":    "blue"
 }`}
             examples={{
               curl:   `curl "${BASE}/api/icons/a-arrow-down"`,

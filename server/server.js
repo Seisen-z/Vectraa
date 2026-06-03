@@ -238,7 +238,6 @@ app.get('/api/icons/:id', async (req, res) => {
       id: icon.id, iconName: iconNameFromId(icon.id), name: icon.name,
       category: icon.category, tags: icon.tags ?? [], style: icon.style,
       source: icon.source, viewBox: icon.viewBox, color: icon.color,
-      svgContent: icon.svgContent,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
