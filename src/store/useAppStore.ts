@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type AppMode = 'icons' | 'conversion' | 'api-docs';
+type AppMode = 'icons' | 'conversion' | 'api-docs' | 'packages';
 
 interface AppState {
   activeAppMode: AppMode;

@@ -9,9 +9,9 @@ import { useIconStore, type ManifestEntry } from '@/store/useIconStore';
 import IconCard from './IconCard';
 import IconModal from './IconModal';
 
-// Card = 88px + 10px label height + 20px gap
-const CELL_W = 116;  // card width + gap
-const CELL_H = 128;  // card + label + gap
+// Card = 72px + 9px label + gaps
+const CELL_W = 96;
+const CELL_H = 104;
 
 interface CellData {
   manifest: ManifestEntry[];

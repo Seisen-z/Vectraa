@@ -1,12 +1,3 @@
-/**
- * IconCard.tsx
- * Matches the reference style:
- *   - Rounded square with 2px solid neon border
- *   - Very dark background with subtle neon colour tint inside
- *   - Large icon centred, coloured in the card's neon colour
- *   - Small label underneath
- *   - Checkbox top-left on hover, download top-right on hover
- */
 import React, { memo, useState, useCallback } from 'react';
 import { useIconStore, type ManifestEntry } from '@/store/useIconStore';
 import { NEON_HEX } from '@/data/iconTypes';
@@ -16,25 +7,22 @@ interface Props {
   onOpenModal: (entry: ManifestEntry) => void;
 }
 
-
 function PlaceholderIcon({ color }: { color: string }) {
   return (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="18" height="18" rx="3"
-        stroke={color} strokeWidth="1.2" strokeDasharray="3 2" opacity="0.3"/>
+        stroke={color} strokeWidth="1" strokeDasharray="3 2" opacity="0.25"/>
     </svg>
   );
 }
 
 const IconCard = memo(({ entry, onOpenModal }: Props) => {
-  const [hovered, setHovered]           = useState(false);
-
+  const [hovered, setHovered] = useState(false);
   const { selectedIds, toggleSelect, getIcon, iconColor, showBorder } = useIconStore();
 
   const isSelected = selectedIds.has(entry.id);
   const fullIcon   = getIcon(entry.id);
   const neonColor  = NEON_HEX[entry.l] ?? '#00B4FF';
-  // Use global color override if set, else use per-card neon colour
   const svgColor   = iconColor || neonColor;
 
   const handleCheck = useCallback((e: React.MouseEvent) => {
@@ -42,13 +30,21 @@ const IconCard = memo(({ entry, onOpenModal }: Props) => {
     toggleSelect(entry.id);
   }, [entry.id, toggleSelect]);
 
-  const handleClick = useCallback(() => {
-    onOpenModal(entry);
-  }, [entry, onOpenModal]);
+  const handleClick = useCallback(() => onOpenModal(entry), [entry, onOpenModal]);
+
+  const borderStyle = showBorder
+    ? `1.5px solid ${hovered || isSelected ? svgColor : `${svgColor}50`}`
+    : `1.5px solid ${hovered ? `${svgColor}25` : isSelected ? `${svgColor}40` : 'transparent'}`;
+
+  const bgStyle = isSelected
+    ? `${svgColor}18`
+    : hovered
+      ? `${svgColor}0C`
+      : 'transparent';
 
   return (
     <div
-      className={`flex flex-col items-center gap-1.5 cursor-pointer relative ${hovered ? 'z-40' : 'z-0'}`}
+      className="flex flex-col items-center gap-1.5 cursor-pointer relative"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
@@ -57,60 +53,40 @@ const IconCard = memo(({ entry, onOpenModal }: Props) => {
       aria-label={`${entry.n} icon`}
       onKeyDown={e => e.key === 'Enter' && handleClick()}
     >
-      {/* ── Card ─────────────────────────────────────────── */}
+      {/* Card */}
       <div
-        className={`relative flex items-center justify-center transition-all duration-200 ${
-          showBorder ? 'rounded-[18px] border-[3px]' : 'rounded-xl'
-        }`}
+        className="relative flex items-center justify-center rounded-xl transition-all duration-150"
         style={{
-          width:  '88px',
-          height: '88px',
-          borderColor: showBorder ? svgColor : 'transparent',
-          background: showBorder
-            ? isSelected
-              ? `${svgColor}28`
-              : `linear-gradient(135deg, ${svgColor}14 0%, var(--bg-card) 60%)`
-            : isSelected
-              ? `${svgColor}22`
-              : 'transparent',
-          boxShadow: showBorder
-            ? hovered
-              ? `0 0 18px 3px ${svgColor}44, inset 0 0 12px ${svgColor}10`
-              : isSelected
-                ? `0 0 12px 2px ${svgColor}55`
-                : 'none'
-            : hovered
-              ? `0 0 12px 2px ${svgColor}22`
-              : 'none',
-          transform: hovered ? 'scale(1.06)' : isSelected ? 'scale(0.96)' : 'scale(1)',
+          width: '72px',
+          height: '72px',
+          background: bgStyle,
+          border: borderStyle,
+          transform: hovered ? 'scale(1.05)' : isSelected ? 'scale(0.96)' : 'scale(1)',
         }}
       >
-        {/* Checkbox — top-left on hover/select */}
+        {/* Checkbox */}
         <div
-          className={`absolute top-1.5 left-1.5 z-10 transition-opacity duration-150 ${hovered || isSelected ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute top-1 left-1 z-10 transition-opacity duration-100 ${hovered || isSelected ? 'opacity-100' : 'opacity-0'}`}
           onClick={handleCheck}
         >
-          <div className={`w-5 h-5 rounded-md flex items-center justify-center border-2 transition-all ${
-            isSelected
-              ? 'border-white bg-white'
-              : 'border-white/40 bg-black/30 hover:border-white/70'
+          <div className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+            isSelected ? 'border-white bg-white' : 'border-white/30 bg-black/20 hover:border-white/60'
           }`}>
             {isSelected && (
-              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
                 <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
           </div>
         </div>
 
-
-        {/* Icon SVG — large, coloured */}
+        {/* Icon */}
         {fullIcon ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox={fullIcon.viewBox}
-            width="54"
-            height="54"
+            width="38"
+            height="38"
             fill="currentColor"
             style={{ color: svgColor }}
             aria-hidden="true"
@@ -121,10 +97,10 @@ const IconCard = memo(({ entry, onOpenModal }: Props) => {
         )}
       </div>
 
-      {/* ── Label ──────────────────────────────────────────── */}
+      {/* Label */}
       <span
-        className="text-[10px] font-semibold text-center leading-tight max-w-[88px] truncate block"
-        style={{ color: neonColor }}
+        className="text-[9px] font-medium text-center leading-tight max-w-[80px] truncate block transition-colors duration-150"
+        style={{ color: hovered ? 'var(--text-secondary)' : 'var(--text-muted)' }}
         title={entry.n}
       >
         {entry.n}
