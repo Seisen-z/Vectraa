@@ -138,25 +138,31 @@ export default function ApiDocsView() {
 
   // Highlight active TOC entry on scroll
   useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
+    const container = mainRef.current;
+    if (!container) return;
     const handler = () => {
+      const containerTop = container.getBoundingClientRect().top;
       const sections = TOC.map(t => document.getElementById(t.id)).filter(Boolean) as HTMLElement[];
       for (let i = sections.length - 1; i >= 0; i--) {
-        if (sections[i].offsetTop - 100 <= el.scrollTop) {
+        const top = sections[i].getBoundingClientRect().top - containerTop;
+        if (top <= 120) {
           setActiveSection(sections[i].id);
           return;
         }
       }
       setActiveSection('overview');
     };
-    el.addEventListener('scroll', handler, { passive: true });
-    return () => el.removeEventListener('scroll', handler);
+    container.addEventListener('scroll', handler, { passive: true });
+    return () => container.removeEventListener('scroll', handler);
   }, []);
 
   const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const container = mainRef.current;
+    const target = document.getElementById(id);
+    if (!container || !target) return;
+    const targetTop = target.getBoundingClientRect().top;
+    const containerTop = container.getBoundingClientRect().top;
+    container.scrollBy({ top: targetTop - containerTop - 24, behavior: 'smooth' });
   };
 
   return (
