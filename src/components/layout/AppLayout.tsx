@@ -10,6 +10,7 @@ import { useIconStore } from '@/store/useIconStore';
 import { useAppStore } from '@/store/useAppStore';
 import { CATEGORIES } from '@/data/categories';
 import ConversionView from '@/components/conversion/ConversionView';
+import ApiDocsView from '@/components/docs/ApiDocsView';
 
 export default function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,11 +47,14 @@ export default function AppLayout() {
               </div>
             </main>
           </>
-        ) : (
+        ) : activeAppMode === 'conversion' ? (
           <ConversionView />
+        ) : (
+          <ApiDocsView />
         )}
       </div>
       {activeAppMode === 'icons' && <BulkDownloadBar />}
+
     </div>
   );
 }

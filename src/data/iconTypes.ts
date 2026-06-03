@@ -88,7 +88,7 @@ export interface IconIndex {
  */
 export type DownloadFormat = 'svg' | 'png' | 'jpg' | 'webp' | 'ico' | 'json';
 
-export type PngSize = 16 | 32 | 64 | 128 | 256 | 512;
+export type PngSize = 16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096;
 
 /**
  * Download request

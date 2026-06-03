@@ -7,7 +7,7 @@ import { NEON_HEX } from '@/data/iconTypes';
 
 interface Props { entry: ManifestEntry; onClose: () => void; }
 
-const PNG_SIZES: PngSize[] = [16, 32, 64, 128, 256, 512];
+const PNG_SIZES: PngSize[] = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 const ALL_FORMATS: { value: DownloadFormat; label: string }[] = [
   { value: 'svg',  label: 'SVG'  },
   { value: 'png',  label: 'PNG'  },

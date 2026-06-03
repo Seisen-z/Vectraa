@@ -83,6 +83,14 @@ export default function Header({ onMobileMenuToggle }: Props) {
         >
           🔄 Conversion
         </button>
+        <button
+          onClick={() => setAppMode('api-docs')}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            activeAppMode === 'api-docs' ? 'bg-[var(--neon-green)]/20 text-[var(--neon-green)]' : 'text-white/60 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          {'</>'}  API
+        </button>
       </div>
 
       {/* Search */}
