@@ -128,7 +128,7 @@ const TOC = [
   { id: 'errors',      label: 'Error Responses' },
 ];
 
-const BASE = 'http://localhost:3000';
+const BASE = 'https://vectraa.vercel.app';
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -218,10 +218,10 @@ export default function ApiDocsView() {
           <section id="base-url" className="mb-10 scroll-mt-20">
             <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4 pb-2 border-b border-[var(--border-subtle)]">Base URL</h2>
             <pre className="p-4 text-xs font-mono text-[#c9d1d9] bg-[#0d1117] rounded-xl border border-white/8 overflow-x-auto">
-              <code>{`http://localhost:3000`}</code>
+              <code>{`https://vectraa.vercel.app`}</code>
             </pre>
             <p className="mt-3 text-xs text-[var(--text-muted)]">
-              When self-hosting, replace with your domain. The server starts with <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">npm run server</code> or <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">npm run dev:all</code>.
+              No setup required — the API is publicly accessible. All endpoints support CORS so you can call them directly from a browser, server, or any HTTP client.
             </p>
           </section>
 
