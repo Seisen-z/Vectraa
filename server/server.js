@@ -39,6 +39,19 @@ let manifestEntries = [];
 const iconCache = new Map();
 /** Which chunk indices are already loaded. */
 const loadedChunks = new Set();
+/**
+ * Short-name → full ID map.
+ * e.g. "a-arrow-down" → "lucide-outline-a-arrow-down"
+ * Built from the manifest. Custom-source icons take priority on collision.
+ */
+const nameIndex = new Map();
+
+// Strip "{source}-{style}-" prefix to get the clean icon name
+const STRIP_PREFIX = /^(?:custom|lucide|tabler|phosphor|bootstrap|heroicons|iconoir|material)-(?:outline|filled|bold|thin|duotone|glyph)-/;
+
+function iconNameFromId(id) {
+  return id.replace(STRIP_PREFIX, '');
+}
 
 async function loadManifest() {
   if (manifestEntries.length) return;
@@ -51,6 +64,14 @@ async function loadManifest() {
     color: r.l ?? r.color ?? 'blue',
     chunk: r.k ?? r.chunk ?? 0,
   }));
+
+  // Build name index — custom-source icons win on collision
+  for (const entry of manifestEntries) {
+    const shortName = iconNameFromId(entry.id);
+    if (!nameIndex.has(shortName) || entry.id.startsWith('custom-')) {
+      nameIndex.set(shortName, entry.id);
+    }
+  }
 }
 
 async function ensureChunk(chunkIndex) {
@@ -61,13 +82,21 @@ async function ensureChunk(chunkIndex) {
   loadedChunks.add(chunkIndex);
 }
 
-async function getIconData(id) {
-  if (iconCache.has(id)) return iconCache.get(id);
+/** Resolve by full ID or by short name (e.g. "a-arrow-down"). */
+async function getIconData(idOrName) {
   await loadManifest();
-  const entry = manifestEntries.find(e => e.id === id);
+  // 1. exact ID hit (already cached)
+  if (iconCache.has(idOrName)) return iconCache.get(idOrName);
+  // 2. exact ID in manifest
+  let entry = manifestEntries.find(e => e.id === idOrName);
+  // 3. short name lookup
+  if (!entry) {
+    const resolvedId = nameIndex.get(idOrName);
+    if (resolvedId) entry = manifestEntries.find(e => e.id === resolvedId);
+  }
   if (!entry) return null;
   await ensureChunk(entry.chunk);
-  return iconCache.get(id) ?? null;
+  return iconCache.get(entry.id) ?? null;
 }
 
 function buildSvgString(icon, colorOverride, showBorder = true, size = 512) {
@@ -157,7 +186,7 @@ app.get('/api/icons', async (req, res) => {
     const total  = results.length;
     const offset = (page - 1) * limit;
     const icons  = results.slice(offset, offset + limit).map(e => ({
-      id: e.id, name: e.name, category: e.category, color: e.color,
+      id: e.id, iconName: iconNameFromId(e.id), name: e.name, category: e.category, color: e.color,
     }));
 
     res.json({ total, page, limit, icons });
@@ -206,7 +235,7 @@ app.get('/api/icons/:id', async (req, res) => {
     const icon = await getIconData(req.params.id);
     if (!icon) return res.status(404).json({ error: 'Icon not found' });
     res.json({
-      id: icon.id, name: icon.name, slug: icon.slug ?? icon.id,
+      id: icon.id, iconName: iconNameFromId(icon.id), name: icon.name,
       category: icon.category, tags: icon.tags ?? [], style: icon.style,
       source: icon.source, viewBox: icon.viewBox, color: icon.color,
       svgContent: icon.svgContent,

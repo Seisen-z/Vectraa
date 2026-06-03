@@ -306,8 +306,14 @@ export default function ApiDocsView() {
           </section>
 
           {/* Divider */}
-          <div className="mb-10">
-            <h2 className="text-lg font-bold text-[var(--text-primary)] mb-1 pb-2 border-b border-[var(--border-subtle)]">Endpoints</h2>
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3 pb-2 border-b border-[var(--border-subtle)]">Endpoints</h2>
+            <div className="rounded-xl border border-[var(--neon-blue)]/20 bg-[var(--neon-blue)]/5 px-4 py-3 text-sm text-[var(--text-secondary)] mb-4">
+              <span className="font-semibold text-[var(--neon-blue)]">Name-based access</span> — use the short <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">iconName</code> (e.g.{' '}
+              <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">a-arrow-down</code>) anywhere a{' '}
+              <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">:id</code> is expected.
+              The full internal ID (e.g. <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-white/40">lucide-outline-a-arrow-down</code>) also works.
+            </div>
           </div>
 
           {/* ── Endpoint: list ─────────────────────────────────── */}
@@ -328,9 +334,10 @@ export default function ApiDocsView() {
   "limit": 50,
   "icons": [
     {
-      "id": "custom-outline-arrow-right",
-      "name": "Arrow Right",
-      "category": "arrows",
+      "id": "lucide-outline-a-arrow-down",
+      "iconName": "a-arrow-down",
+      "name": "A Arrow Down",
+      "category": "text",
       "color": "blue"
     }
   ]
@@ -390,31 +397,31 @@ foreach ($cats as $c) {
             path="/api/icons/:id"
             desc="Returns full metadata for a single icon including the raw SVG path content, tags, viewBox, and color."
             params={[
-              { name: 'id', type: 'string', required: true, desc: 'The icon id as returned by the list endpoint (e.g. custom-outline-arrow-right).' },
+              { name: 'id', type: 'string', required: true, desc: 'The icon id as returned by the list endpoint (e.g. a-arrow-down).' },
             ]}
             response={`{
-  "id":         "custom-outline-arrow-right",
-  "name":       "Arrow Right",
-  "slug":       "custom-outline-arrow-right",
-  "category":   "arrows",
-  "tags":       ["arrow", "right", "navigate", "next"],
+  "id":         "lucide-outline-a-arrow-down",
+  "iconName":   "a-arrow-down",
+  "name":       "A Arrow Down",
+  "category":   "text",
+  "tags":       ["a", "arrow", "down", "letter", "font", "text"],
   "style":      "outline",
-  "source":     "custom",
+  "source":     "lucide",
   "viewBox":    "0 0 24 24",
   "color":      "blue",
-  "svgContent": "<path d=\\"M5 12h14M12 5l7 7-7 7\\"/>"
+  "svgContent": "<path d=\\"M2 18H9\\"/><path d=\\"M12 18L22 18\\"/><path d=\\"M19 15L22 18L19 21\\"/><path d=\\"M5 10.5L9 3L13 10.5\\"/><path d=\\"M5.7 9H12.3\\"/>"
 }`}
             examples={{
-              curl:   `curl "${BASE}/api/icons/custom-outline-arrow-right"`,
-              js:     `const res  = await fetch('${BASE}/api/icons/custom-outline-arrow-right');
+              curl:   `curl "${BASE}/api/icons/a-arrow-down"`,
+              js:     `const res  = await fetch('${BASE}/api/icons/a-arrow-down');
 const icon = await res.json();
 console.log(icon.svgContent);`,
               python: `import requests
 
-icon = requests.get('${BASE}/api/icons/custom-outline-arrow-right').json()
+icon = requests.get('${BASE}/api/icons/a-arrow-down').json()
 print(icon['svgContent'])`,
               php:    `<?php
-$icon = json_decode(file_get_contents('${BASE}/api/icons/custom-outline-arrow-right'), true);
+$icon = json_decode(file_get_contents('${BASE}/api/icons/a-arrow-down'), true);
 echo $icon['svgContent'];`,
             }}
           />
@@ -440,10 +447,10 @@ echo $icon['svgContent'];`,
 </svg>`}
             examples={{
               curl: `# Save SVG file
-curl "${BASE}/api/icons/custom-outline-arrow-right/svg?color=FF2D78&border=false" \\
+curl "${BASE}/api/icons/a-arrow-down/svg?color=FF2D78&border=false" \\
      -o arrow-right.svg`,
               js: `// Embed directly in an <img> or display inline
-const url = '${BASE}/api/icons/custom-outline-arrow-right/svg?color=00FF87';
+const url = '${BASE}/api/icons/a-arrow-down/svg?color=00FF87';
 document.getElementById('my-icon').src = url;
 
 // Or fetch the text and inject as innerHTML
@@ -452,13 +459,13 @@ document.getElementById('container').innerHTML = svg;`,
               python: `import requests
 
 r = requests.get(
-    '${BASE}/api/icons/custom-outline-arrow-right/svg',
+    '${BASE}/api/icons/a-arrow-down/svg',
     params={'color': 'FF2D78', 'border': 'false'}
 )
 with open('arrow-right.svg', 'wb') as f:
     f.write(r.content)`,
               php: `<?php
-$url = '${BASE}/api/icons/custom-outline-arrow-right/svg?' . http_build_query([
+$url = '${BASE}/api/icons/a-arrow-down/svg?' . http_build_query([
     'color'  => 'FF2D78',
     'border' => 'false',
 ]);
@@ -481,11 +488,11 @@ file_put_contents('arrow-right.svg', file_get_contents($url));`,
 <!-- Binary PNG data stream -->`}
             examples={{
               curl: `# 256 px, pink, no border
-curl "${BASE}/api/icons/custom-outline-arrow-right/png?size=256&color=FF2D78&border=false" \\
+curl "${BASE}/api/icons/a-arrow-down/png?size=256&color=FF2D78&border=false" \\
      -o arrow-right-256.png`,
               js: `// Display in an <img> tag — browser fetches directly
 const img   = document.createElement('img');
-img.src     = '${BASE}/api/icons/custom-outline-arrow-right/png?size=128&color=00B4FF';
+img.src     = '${BASE}/api/icons/a-arrow-down/png?size=128&color=00B4FF';
 img.width   = 128;
 document.body.appendChild(img);
 
@@ -498,13 +505,13 @@ link.click();`,
               python: `import requests
 
 r = requests.get(
-    '${BASE}/api/icons/custom-outline-arrow-right/png',
+    '${BASE}/api/icons/a-arrow-down/png',
     params={'size': 256, 'color': 'FF2D78', 'border': 'false'}
 )
 with open('arrow-right.png', 'wb') as f:
     f.write(r.content)`,
               php: `<?php
-$url = '${BASE}/api/icons/custom-outline-arrow-right/png?' . http_build_query([
+$url = '${BASE}/api/icons/a-arrow-down/png?' . http_build_query([
     'size'   => 256,
     'color'  => 'FF2D78',
     'border' => 'false',
@@ -527,19 +534,19 @@ file_put_contents('arrow-right.png', file_get_contents($url));`,
             response={`<!-- Content-Type: image/jpeg -->
 <!-- Binary JPEG data stream -->`}
             examples={{
-              curl: `curl "${BASE}/api/icons/custom-outline-arrow-right/jpg?size=512&color=cyan" \\
+              curl: `curl "${BASE}/api/icons/a-arrow-down/jpg?size=512&color=cyan" \\
      -o arrow-right.jpg`,
-              js: `const url = '${BASE}/api/icons/custom-outline-arrow-right/jpg?size=512&color=cyan';
+              js: `const url = '${BASE}/api/icons/a-arrow-down/jpg?size=512&color=cyan';
 const res  = await fetch(url);
 const blob = await res.blob();
 // use blob as needed`,
               python: `import requests
 
-r = requests.get('${BASE}/api/icons/custom-outline-arrow-right/jpg',
+r = requests.get('${BASE}/api/icons/a-arrow-down/jpg',
                  params={'size': 512, 'color': 'cyan'})
 open('arrow.jpg', 'wb').write(r.content)`,
               php: `<?php
-$data = file_get_contents('${BASE}/api/icons/custom-outline-arrow-right/jpg?size=512&color=cyan');
+$data = file_get_contents('${BASE}/api/icons/a-arrow-down/jpg?size=512&color=cyan');
 file_put_contents('arrow.jpg', $data);`,
             }}
           />
@@ -558,16 +565,16 @@ file_put_contents('arrow.jpg', $data);`,
             response={`<!-- Content-Type: image/webp -->
 <!-- Binary WebP data stream -->`}
             examples={{
-              curl: `curl "${BASE}/api/icons/custom-outline-arrow-right/webp?size=128" \\
+              curl: `curl "${BASE}/api/icons/a-arrow-down/webp?size=128" \\
      -o arrow-right.webp`,
-              js: `const url = '${BASE}/api/icons/custom-outline-arrow-right/webp?size=128';
+              js: `const url = '${BASE}/api/icons/a-arrow-down/webp?size=128';
 document.querySelector('img').src = url;`,
               python: `import requests
 
-r = requests.get('${BASE}/api/icons/custom-outline-arrow-right/webp', params={'size': 128})
+r = requests.get('${BASE}/api/icons/a-arrow-down/webp', params={'size': 128})
 open('arrow.webp', 'wb').write(r.content)`,
               php: `<?php
-$data = file_get_contents('${BASE}/api/icons/custom-outline-arrow-right/webp?size=128');
+$data = file_get_contents('${BASE}/api/icons/a-arrow-down/webp?size=128');
 file_put_contents('arrow.webp', $data);`,
             }}
           />
