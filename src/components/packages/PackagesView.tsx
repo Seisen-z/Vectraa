@@ -5,10 +5,13 @@ const BASE = 'https://vectraa.vercel.app';
 
 // ─── Framework logo badges ────────────────────────────────────────────────────
 
-function Logo({ bg, text, textColor = '#fff' }: { bg: string; text: string; textColor?: string }) {
+function Logo({ slug, bg, iconColor }: { slug: string; bg: string; iconColor?: string }) {
+  const src = iconColor
+    ? `https://cdn.simpleicons.org/${slug}/${iconColor}`
+    : `https://cdn.simpleicons.org/${slug}`;
   return (
-    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm" style={{ background: bg, color: textColor }}>
-      {text}
+    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: bg }}>
+      <img src={src} width={26} height={26} alt={slug} />
     </div>
   );
 }
@@ -29,7 +32,7 @@ const PACKAGES: Pkg[] = [
   {
     id: 'js',
     name: 'JavaScript',
-    logo: <Logo bg="#F7DF1E" text="JS" textColor="#000" />,
+    logo: <Logo slug="javascript" bg="#F7DF1E22" />,
     badge: 'fetch API',
     badgeColor: '#F7DF1E',
     desc: 'Use Vectra icons in any JavaScript or TypeScript project — no install required.',
@@ -46,7 +49,7 @@ img.src = '${BASE}/api/icons/arrow-right/png?size=64&color=FF2D78';`,
   {
     id: 'react',
     name: 'React',
-    logo: <Logo bg="#20232a" text="⚛" />,
+    logo: <Logo slug="react" bg="#61DAFB18" />,
     badge: 'component',
     badgeColor: '#61DAFB',
     desc: 'Drop a tiny wrapper component into your React app and use any Vectra icon by name.',
@@ -68,7 +71,7 @@ img.src = '${BASE}/api/icons/arrow-right/png?size=64&color=FF2D78';`,
   {
     id: 'nextjs',
     name: 'Next.js',
-    logo: <Logo bg="#000" text="N" />,
+    logo: <Logo slug="nextdotjs" bg="#ffffff12" iconColor="ffffff" />,
     badge: 'next/image',
     badgeColor: '#ffffff',
     desc: 'Use next/image with the Vectra API URL for automatic optimisation and lazy loading.',
@@ -90,7 +93,7 @@ export function VectraIcon({ name, size = 24, color = '00B4FF' }) {
   {
     id: 'vue',
     name: 'Vue',
-    logo: <Logo bg="#1a1a2e" text="▲" textColor="#42B883" />,
+    logo: <Logo slug="vuedotjs" bg="#42B88318" />,
     badge: 'component',
     badgeColor: '#42B883',
     desc: 'Register a global VectraIcon component in your Vue 3 application.',
@@ -111,7 +114,7 @@ const url = \`${BASE}/api/icons/\${props.name}/svg?size=\${props.size}&color=\${
   {
     id: 'svelte',
     name: 'Svelte',
-    logo: <Logo bg="#1a0a00" text="S" textColor="#FF3E00" />,
+    logo: <Logo slug="svelte" bg="#FF3E0018" />,
     badge: 'component',
     badgeColor: '#FF3E00',
     desc: 'A tiny Svelte component that pulls any icon by name from the Vectra API.',
@@ -130,7 +133,7 @@ const url = \`${BASE}/api/icons/\${props.name}/svg?size=\${props.size}&color=\${
   {
     id: 'angular',
     name: 'Angular',
-    logo: <Logo bg="#1a001a" text="A" textColor="#DD0031" />,
+    logo: <Logo slug="angular" bg="#DD003118" />,
     badge: 'pipe',
     badgeColor: '#DD0031',
     desc: 'Use the Vectra REST API inside an Angular template with a simple pipe or service.',
@@ -155,7 +158,7 @@ export class VectraIconComponent {
   {
     id: 'nuxt',
     name: 'Nuxt',
-    logo: <Logo bg="#001a0d" text="N" textColor="#00DC82" />,
+    logo: <Logo slug="nuxtdotjs" bg="#00DC8218" />,
     badge: 'component',
     badgeColor: '#00DC82',
     desc: 'Register VectraIcon as a global Nuxt component — works with SSR and static generation.',
@@ -176,7 +179,7 @@ const url = \`${BASE}/api/icons/\${name}/png?size=\${size * 2}&color=\${color}\`
   {
     id: 'astro',
     name: 'Astro',
-    logo: <Logo bg="#0f0013" text="✦" textColor="#FF5D01" />,
+    logo: <Logo slug="astro" bg="#FF5D0118" />,
     badge: 'component',
     badgeColor: '#FF5D01',
     desc: 'Use Vectra icons in Astro pages and components with zero JavaScript overhead.',
@@ -195,7 +198,7 @@ const src = \`${BASE}/api/icons/\${name}/svg?size=\${size}&color=\${color}\`;
   {
     id: 'python',
     name: 'Python',
-    logo: <Logo bg="#1a1a2e" text="Py" textColor="#4B8BBE" />,
+    logo: <Logo slug="python" bg="#3776AB18" />,
     badge: 'requests',
     badgeColor: '#4B8BBE',
     desc: 'Download or embed Vectra icons in any Python application using the requests library.',
@@ -216,7 +219,7 @@ svg = requests.get(f'${BASE}/api/icons/arrow-right/svg').text`,
   {
     id: 'php',
     name: 'PHP',
-    logo: <Logo bg="#1a1429" text="PHP" textColor="#8892BF" />,
+    logo: <Logo slug="php" bg="#777BB418" />,
     badge: 'file_get_contents',
     badgeColor: '#8892BF',
     desc: 'Embed Vectra icons in PHP templates or download them to your server.',
@@ -237,7 +240,7 @@ file_put_contents('icon.png', $png);`,
   {
     id: 'go',
     name: 'Go',
-    logo: <Logo bg="#001a29" text="Go" textColor="#00ACD7" />,
+    logo: <Logo slug="go" bg="#00ADD818" />,
     badge: 'net/http',
     badgeColor: '#00ACD7',
     desc: 'Fetch Vectra icons in any Go application using the standard library.',
@@ -263,7 +266,7 @@ func main() {
   {
     id: 'ruby',
     name: 'Ruby',
-    logo: <Logo bg="#1a0000" text="Rb" textColor="#CC342D" />,
+    logo: <Logo slug="ruby" bg="#CC342D18" />,
     badge: 'Net::HTTP',
     badgeColor: '#CC342D',
     desc: 'Use Vectra icons in Ruby or Rails projects with the built-in HTTP client.',
