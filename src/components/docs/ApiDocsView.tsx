@@ -312,7 +312,7 @@ export default function ApiDocsView() {
               <span className="font-semibold text-[var(--neon-blue)]">Name-based access</span> — use the short <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">iconName</code> (e.g.{' '}
               <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">a-arrow-down</code>) anywhere a{' '}
               <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">:id</code> is expected.
-              The full internal ID (e.g. <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-white/40">lucide-outline-a-arrow-down</code>) also works.
+              The full internal ID (e.g. <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-white/40">custom-outline-a-arrow-down</code>) also works.
             </div>
           </div>
 
@@ -334,10 +334,10 @@ export default function ApiDocsView() {
   "limit": 50,
   "icons": [
     {
-      "id": "lucide-outline-a-arrow-down",
+      "id": "custom-outline-a-arrow-down",
       "iconName": "a-arrow-down",
       "name": "A Arrow Down",
-      "category": "text",
+      "category": "arrows",
       "color": "blue"
     }
   ]
@@ -400,13 +400,13 @@ foreach ($cats as $c) {
               { name: 'id', type: 'string', required: true, desc: 'The icon id as returned by the list endpoint (e.g. a-arrow-down).' },
             ]}
             response={`{
-  "id":         "lucide-outline-a-arrow-down",
+  "id":         "custom-outline-a-arrow-down",
   "iconName":   "a-arrow-down",
   "name":       "A Arrow Down",
-  "category":   "text",
+  "category":   "arrows",
   "tags":       ["a", "arrow", "down", "letter", "font", "text"],
   "style":      "outline",
-  "source":     "lucide",
+  "source":     "custom",
   "viewBox":    "0 0 24 24",
   "color":      "blue",
   "svgContent": "<path d=\\"M2 18H9\\"/><path d=\\"M12 18L22 18\\"/><path d=\\"M19 15L22 18L19 21\\"/><path d=\\"M5 10.5L9 3L13 10.5\\"/><path d=\\"M5.7 9H12.3\\"/>"
