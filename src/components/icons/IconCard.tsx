@@ -69,7 +69,7 @@ const IconCard = memo(({ entry, onOpenModal }: Props) => {
           background: showBorder
             ? isSelected
               ? `${svgColor}28`
-              : `linear-gradient(135deg, ${svgColor}14 0%, #131319 60%)`
+              : `linear-gradient(135deg, ${svgColor}14 0%, var(--bg-card) 60%)`
             : isSelected
               ? `${svgColor}22`
               : 'transparent',
