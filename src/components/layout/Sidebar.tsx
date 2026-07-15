@@ -6,21 +6,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CATEGORIES } from '@/data/categories';
 import { useIconStore } from '@/store/useIconStore';
-import type { IconCollection } from '@/data/iconTypes';
 
 interface Props { mobileOpen: boolean; onMobileClose: () => void; }
 
 export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const {
-    activeCategory, setCategory, activeCollection, setCollection,
+    activeCategory, setCategory,
     browseView, setBrowseView, manifest, iconColor, setIconColor, showBorder, setShowBorder,
-    strokeWidth, setStrokeWidth,
+    borderWidth, setBorderWidth,
   } = useIconStore();
 
-  const collectionManifest = manifest.filter(m => m.g === activeCollection);
-  const totalCount = collectionManifest.length;
+  const totalCount = manifest.length;
   const countMap: Record<string, number> = {};
-  for (const icon of collectionManifest) countMap[icon.c] = (countMap[icon.c] ?? 0) + 1;
+  for (const icon of manifest) countMap[icon.c] = (countMap[icon.c] ?? 0) + 1;
 
   const selectAll = () => { setBrowseView('all'); onMobileClose(); };
   const selectCategory = (id: string) => { setCategory(id); onMobileClose(); };
@@ -61,33 +59,33 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
   };
   const swatch = localColor || '#FFFFFF';
 
-  // Same throttling approach for the stroke-width slider — dragging fires
+  // Same throttling approach for the border-width slider — dragging fires
   // onChange continuously, and each write re-renders every visible card.
-  const STROKE_THROTTLE_MS = 80;
-  const [localStrokeWidth, setLocalStrokeWidth] = useState(strokeWidth);
-  useEffect(() => setLocalStrokeWidth(strokeWidth), [strokeWidth]);
-  const strokeLastCommitRef = useRef(0);
-  const strokePendingRef = useRef<number | null>(null);
-  const strokeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleStrokeWidthChange = (value: number) => {
-    setLocalStrokeWidth(value);
+  const BORDER_THROTTLE_MS = 80;
+  const [localBorderWidth, setLocalBorderWidth] = useState(borderWidth);
+  useEffect(() => setLocalBorderWidth(borderWidth), [borderWidth]);
+  const borderLastCommitRef = useRef(0);
+  const borderPendingRef = useRef<number | null>(null);
+  const borderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleBorderWidthChange = (value: number) => {
+    setLocalBorderWidth(value);
     const now = Date.now();
-    const elapsed = now - strokeLastCommitRef.current;
-    if (elapsed >= STROKE_THROTTLE_MS) {
-      strokeLastCommitRef.current = now;
-      setStrokeWidth(value);
+    const elapsed = now - borderLastCommitRef.current;
+    if (elapsed >= BORDER_THROTTLE_MS) {
+      borderLastCommitRef.current = now;
+      setBorderWidth(value);
       return;
     }
-    strokePendingRef.current = value;
-    if (strokeTimerRef.current === null) {
-      strokeTimerRef.current = setTimeout(() => {
-        strokeTimerRef.current = null;
-        strokeLastCommitRef.current = Date.now();
-        if (strokePendingRef.current !== null) {
-          setStrokeWidth(strokePendingRef.current);
-          strokePendingRef.current = null;
+    borderPendingRef.current = value;
+    if (borderTimerRef.current === null) {
+      borderTimerRef.current = setTimeout(() => {
+        borderTimerRef.current = null;
+        borderLastCommitRef.current = Date.now();
+        if (borderPendingRef.current !== null) {
+          setBorderWidth(borderPendingRef.current);
+          borderPendingRef.current = null;
         }
-      }, STROKE_THROTTLE_MS - elapsed);
+      }, BORDER_THROTTLE_MS - elapsed);
     }
   };
 
@@ -100,7 +98,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-[var(--text-primary)]">Customizer</h3>
             <button
-              onClick={() => { setIconColor(''); setShowBorder(true); setStrokeWidth(2); }}
+              onClick={() => { setIconColor(''); setShowBorder(true); setBorderWidth(1.5); }}
               aria-label="Reset customizer"
               className="w-6 h-6 flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 transition-colors"
             >
@@ -136,22 +134,22 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           </label>
 
           <div className="flex items-center justify-between mb-2">
-            <p className={`text-xs ${activeCollection === 'line' ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)]'}`}>Stroke width</p>
-            <span className="text-[11px] font-mono text-[var(--text-muted)]">{localStrokeWidth}px</span>
+            <p className="text-xs text-[var(--text-secondary)]">Border width</p>
+            <span className="text-[11px] font-mono text-[var(--text-muted)]">{localBorderWidth}px</span>
           </div>
           <input
             type="range"
             min={0.5}
             max={4}
             step={0.25}
-            value={localStrokeWidth}
-            onChange={e => handleStrokeWidthChange(parseFloat(e.target.value))}
-            disabled={activeCollection !== 'line'}
+            value={localBorderWidth}
+            onChange={e => handleBorderWidthChange(parseFloat(e.target.value))}
+            disabled={!showBorder}
             className="w-full accent-[var(--accent)] disabled:opacity-40 disabled:cursor-not-allowed"
-            aria-label="Stroke width"
+            aria-label="Border width"
           />
           <p className="text-[10px] text-[var(--text-muted)] mt-1 mb-4">
-            {activeCollection === 'line' ? 'Applies to outline icons' : 'Switch to Line icons to use this'}
+            {showBorder ? 'Card border ring thickness' : 'Enable border to use this'}
           </p>
 
           <p className="text-xs text-[var(--text-secondary)] mb-2">Border</p>
@@ -166,26 +164,6 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
               style={{ left: showBorder ? '18px' : '2px' }}
             />
           </button>
-        </div>
-
-        {/* ── Icon set (secondary, outside the card) ──────── */}
-        <div className="mb-5">
-          <p className="text-sm font-bold text-[var(--text-primary)] mb-2">Icon set</p>
-          <div className="flex items-center gap-4">
-            {(['color', 'line'] as IconCollection[]).map(id => (
-              <button
-                key={id}
-                onClick={() => setCollection(id)}
-                className={`text-[13px] transition-colors ${
-                  activeCollection === id
-                    ? 'text-[var(--accent)] font-semibold'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-                }`}
-              >
-                {id === 'color' ? 'Color' : 'Line'}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* ── View ─────────────────────────────────────────── */}
