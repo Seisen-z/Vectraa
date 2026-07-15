@@ -19,7 +19,7 @@ function CodeBlock({ tabs }: { tabs: Record<Lang, string> }) {
             onClick={() => setLang(l)}
             className={`px-4 py-2 text-xs font-mono font-semibold transition-colors ${
               lang === l
-                ? 'text-[var(--neon-green)] border-b-2 border-[var(--neon-green)] bg-[var(--neon-green)]/5'
+                ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-[var(--accent-soft)]'
                 : 'text-white/40 hover:text-white/70'
             }`}
           >
@@ -37,7 +37,7 @@ function CodeBlock({ tabs }: { tabs: Record<Lang, string> }) {
 function Badge({ method }: { method: string }) {
   const colors: Record<string, string> = {
     GET: 'bg-[var(--neon-green)]/15 text-[var(--neon-green)] border-[var(--neon-green)]/30',
-    POST: 'bg-[var(--neon-blue)]/15 text-[var(--neon-blue)] border-[var(--neon-blue)]/30',
+    POST: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold font-mono border ${colors[method] ?? 'bg-white/10 text-white/60 border-white/10'}`}>
@@ -56,7 +56,7 @@ function Endpoint({ id, method, path, desc, params, response, examples }: {
     <section id={id} className="mb-12 scroll-mt-20">
       <div className="flex items-center gap-3 mb-3">
         <Badge method={method} />
-        <code className="text-sm font-mono text-[var(--neon-blue)] bg-[var(--neon-blue)]/5 px-3 py-1 rounded-lg border border-[var(--neon-blue)]/20">
+        <code className="text-sm font-mono text-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1 rounded-lg border border-[var(--accent-border)]">
           {path}
         </code>
       </div>
@@ -176,7 +176,7 @@ export default function ApiDocsView() {
             onClick={() => scrollTo(t.id)}
             className={`text-left px-3 py-1.5 rounded-lg text-xs transition-colors ${
               activeSection === t.id
-                ? 'text-[var(--neon-green)] bg-[var(--neon-green)]/8 font-semibold'
+                ? 'text-[var(--accent)] bg-[var(--accent-soft)] font-semibold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
             }`}
           >
@@ -191,8 +191,8 @@ export default function ApiDocsView() {
 
           {/* Header */}
           <div className="mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--neon-green)]/10 border border-[var(--neon-green)]/25 text-[var(--neon-green)] text-xs font-semibold mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--neon-green)] animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent-soft)] border border-[var(--accent-border)] text-[var(--accent)] text-xs font-semibold mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
               REST API
             </div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-3">Vectra Icon API</h1>
@@ -258,7 +258,7 @@ export default function ApiDocsView() {
                     ['4096', 'High-res print / poster'],
                   ].map(([s, u], i, a) => (
                     <tr key={s} className={i < a.length - 1 ? 'border-b border-white/5' : ''}>
-                      <td className="px-4 py-2.5 font-mono text-[var(--neon-blue)]">{s}×{s}</td>
+                      <td className="px-4 py-2.5 font-mono text-[var(--accent)]">{s}×{s}</td>
                       <td className="px-4 py-2.5 text-[var(--text-secondary)]">{u}</td>
                     </tr>
                   ))}
@@ -308,8 +308,8 @@ export default function ApiDocsView() {
           {/* Divider */}
           <div className="mb-6">
             <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3 pb-2 border-b border-[var(--border-subtle)]">Endpoints</h2>
-            <div className="rounded-xl border border-[var(--neon-blue)]/20 bg-[var(--neon-blue)]/5 px-4 py-3 text-sm text-[var(--text-secondary)] mb-4">
-              <span className="font-semibold text-[var(--neon-blue)]">Name-based access</span> — use the short <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">iconName</code> (e.g.{' '}
+            <div className="rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--text-secondary)] mb-4">
+              <span className="font-semibold text-[var(--accent)]">Name-based access</span> — use the short <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">iconName</code> (e.g.{' '}
               <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">a-arrow-down</code>) anywhere a{' '}
               <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-[var(--neon-cyan)]">:id</code> is expected.
               The full internal ID (e.g. <code className="font-mono bg-white/5 px-1 py-0.5 rounded text-white/40">custom-outline-a-arrow-down</code>) also works.
@@ -395,7 +395,7 @@ foreach ($cats as $c) {
             id="ep-meta"
             method="GET"
             path="/api/icons/:id"
-            desc="Returns full metadata for a single icon including the raw SVG path content, tags, viewBox, and color."
+            desc="Returns metadata for a single icon: name, category, tags, style, viewBox, and color. For the raw SVG content, use the /svg endpoint below."
             params={[
               { name: 'id', type: 'string', required: true, desc: 'The icon id as returned by the list endpoint (e.g. a-arrow-down).' },
             ]}
@@ -414,14 +414,14 @@ foreach ($cats as $c) {
               curl:   `curl "${BASE}/api/icons/a-arrow-down"`,
               js:     `const res  = await fetch('${BASE}/api/icons/a-arrow-down');
 const icon = await res.json();
-console.log(icon.svgContent);`,
+console.log(icon.tags);`,
               python: `import requests
 
 icon = requests.get('${BASE}/api/icons/a-arrow-down').json()
-print(icon['svgContent'])`,
+print(icon['tags'])`,
               php:    `<?php
 $icon = json_decode(file_get_contents('${BASE}/api/icons/a-arrow-down'), true);
-echo $icon['svgContent'];`,
+echo implode(', ', $icon['tags']);`,
             }}
           />
 

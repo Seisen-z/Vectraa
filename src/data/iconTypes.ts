@@ -29,6 +29,7 @@ export const NEON_HEX: Record<string, string> = {
 
 /** Icon source library identifier */
 export type IconSource =
+  | 'custom'
   | 'lucide'
   | 'tabler'
   | 'phosphor'

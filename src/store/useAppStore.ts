@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type AppMode = 'icons' | 'conversion' | 'api-docs' | 'packages';
+type AppMode = 'landing' | 'icons' | 'conversion' | 'api-docs' | 'packages';
 
 interface AppState {
   activeAppMode: AppMode;
@@ -8,6 +8,6 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  activeAppMode: 'icons',
+  activeAppMode: 'landing',
   setAppMode: (mode) => set({ activeAppMode: mode }),
 }));

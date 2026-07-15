@@ -31,9 +31,13 @@ export default function Header({ onMobileMenuToggle }: Props) {
       </button>
 
       {/* Logo */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="w-6 h-6 rounded-md bg-[var(--neon-blue)]/15 border border-[var(--neon-blue)]/40 flex items-center justify-center">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--neon-blue)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <button
+        onClick={() => setAppMode('landing')}
+        className="flex items-center gap-2 shrink-0"
+        aria-label="Go to home"
+      >
+        <div className="w-6 h-6 rounded-md bg-[var(--accent-soft)] border border-[var(--accent-border)] flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1"/>
             <rect x="14" y="3" width="7" height="7" rx="1"/>
             <rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -41,9 +45,9 @@ export default function Header({ onMobileMenuToggle }: Props) {
           </svg>
         </div>
         <span className="hidden sm:block text-sm font-bold text-[var(--text-primary)] tracking-tight">
-          Vec<span style={{ color: 'var(--neon-blue)' }}>tra</span>
+          Vec<span style={{ color: 'var(--accent)' }}>tra</span>
         </span>
-      </div>
+      </button>
 
       {/* Nav */}
       <nav className="hidden md:flex items-center gap-0.5 ml-2">

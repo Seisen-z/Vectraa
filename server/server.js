@@ -46,8 +46,8 @@ const loadedChunks = new Set();
  */
 const nameIndex = new Map();
 
-// Strip "{source}-{style}-" prefix to get the clean icon name
-const STRIP_PREFIX = /^(?:custom|lucide|tabler|phosphor|bootstrap|heroicons|iconoir|material)-(?:outline|filled|bold|thin|duotone|glyph)-/;
+// Strip "{source}-" or "{source}-{style}-" prefix to get the clean icon name
+const STRIP_PREFIX = /^(?:custom|lucide|tabler|phosphor|bootstrap|heroicons|iconoir|material)-(?:(?:outline|filled|bold|thin|duotone|glyph)-)?/;
 
 function iconNameFromId(id) {
   return id.replace(STRIP_PREFIX, '');
@@ -99,20 +99,39 @@ async function getIconData(idOrName) {
   return iconCache.get(entry.id) ?? null;
 }
 
-function buildSvgString(icon, colorOverride, showBorder = true, size = 512) {
-  let color = NEON_HEX[icon.color] ?? '#00B4FF';
-  if (colorOverride && colorOverride !== 'currentColor') {
-    color = colorOverride.startsWith('#') ? colorOverride : `#${colorOverride}`;
-  }
+const HEX_COLOR_RE = /^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$|^[0-9a-fA-F]{8}$/;
+
+/** Resolve a `color` query param to a safe hex string, falling back to the icon's own neon color. */
+function resolveColor(icon, colorOverride) {
+  const fallback = NEON_HEX[icon.color] ?? '#00B4FF';
+  if (!colorOverride || colorOverride === 'currentColor') return fallback;
+  if (NEON_HEX[colorOverride]) return NEON_HEX[colorOverride];
+  const hex = colorOverride.startsWith('#') ? colorOverride.slice(1) : colorOverride;
+  return HEX_COLOR_RE.test(hex) ? `#${hex}` : fallback;
+}
+
+/** Clamp the `strokeWidth` query param to a sane range for outline icons. */
+function resolveStrokeWidth(raw) {
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n)) return 2;
+  return Math.min(4, Math.max(0.5, n));
+}
+
+function buildSvgString(icon, colorOverride, showBorder = true, size = 512, strokeWidth = 2) {
+  const color = resolveColor(icon, colorOverride);
   const content = icon.svgContent.replace(/currentColor/g, color);
+  const isOutline = icon.style === 'outline';
+  const paint = isOutline
+    ? `fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"`
+    : `fill="${color}"`;
 
   if (!showBorder) {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="${size}" height="${size}" fill="${color}">\n  ${content}\n</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="${size}" height="${size}" ${paint}>\n  ${content}\n</svg>`;
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="${size}" height="${size}">
   <rect x="1.5" y="1.5" width="85" height="85" rx="16" fill="none" stroke="${color}" stroke-width="3"/>
-  <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" fill="${color}">
+  <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" ${paint}>
     ${content}
   </svg>
 </svg>`;
@@ -249,19 +268,25 @@ app.get('/api/icons/:id', async (req, res) => {
  * Returns the SVG file directly.
  *
  * Query params:
- *   color  — hex color without # (e.g. FF2D78) or named neon key (pink, blue…)
- *   border — "true" / "false" (default true)
- *   size   — pixel size for width/height attribute (default 512)
+ *   color       — hex color without # (e.g. FF2D78) or named neon key (pink, blue…)
+ *   border      — "true" / "false" (default true)
+ *   size        — pixel size for width/height attribute: 16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096 (default 512)
+ *   strokeWidth — outline-icon stroke width, 0.5–4 (default 2; ignored for filled icons)
  */
 app.get('/api/icons/:id/svg', async (req, res) => {
   try {
     const icon = await getIconData(req.params.id);
     if (!icon) return res.status(404).json({ error: 'Icon not found' });
 
-    const color     = req.query.color  ?? null;
-    const border    = req.query.border !== 'false';
-    const size      = parseInt(req.query.size ?? '512', 10);
-    const svgString = buildSvgString(icon, color, border, size);
+    const size = parseInt(req.query.size ?? '512', 10);
+    if (!VALID_SIZES.has(size)) {
+      return res.status(400).json({ error: `Invalid size. Valid sizes: ${[...VALID_SIZES].join(', ')}` });
+    }
+
+    const color       = req.query.color  ?? null;
+    const border      = req.query.border !== 'false';
+    const strokeWidth = resolveStrokeWidth(req.query.strokeWidth);
+    const svgString   = buildSvgString(icon, color, border, size, strokeWidth);
 
     res.setHeader('Content-Type', 'image/svg+xml');
     res.setHeader('Content-Disposition', `inline; filename="${icon.slug ?? icon.id}.svg"`);
@@ -290,10 +315,11 @@ app.get('/api/icons/:id/png', async (req, res) => {
       return res.status(400).json({ error: `Invalid size. Valid sizes: ${[...VALID_SIZES].join(', ')}` });
     }
 
-    const color     = req.query.color ?? null;
-    const border    = req.query.border !== 'false';
-    const svgString = buildSvgString(icon, color, border, size);
-    const buffer    = await svgToRaster(svgString, size, 'png');
+    const color       = req.query.color ?? null;
+    const border      = req.query.border !== 'false';
+    const strokeWidth = resolveStrokeWidth(req.query.strokeWidth);
+    const svgString   = buildSvgString(icon, color, border, size, strokeWidth);
+    const buffer      = await svgToRaster(svgString, size, 'png');
 
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Content-Disposition', `inline; filename="${icon.slug ?? icon.id}-${size}.png"`);
@@ -319,10 +345,11 @@ app.get('/api/icons/:id/jpg', async (req, res) => {
       return res.status(400).json({ error: `Invalid size. Valid sizes: ${[...VALID_SIZES].join(', ')}` });
     }
 
-    const color     = req.query.color ?? null;
-    const border    = req.query.border !== 'false';
-    const svgString = buildSvgString(icon, color, border, size);
-    const buffer    = await svgToRaster(svgString, size, 'jpeg', '#131319');
+    const color       = req.query.color ?? null;
+    const border      = req.query.border !== 'false';
+    const strokeWidth = resolveStrokeWidth(req.query.strokeWidth);
+    const svgString   = buildSvgString(icon, color, border, size, strokeWidth);
+    const buffer      = await svgToRaster(svgString, size, 'jpeg', '#131319');
 
     res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Content-Disposition', `inline; filename="${icon.slug ?? icon.id}-${size}.jpg"`);
@@ -348,10 +375,11 @@ app.get('/api/icons/:id/webp', async (req, res) => {
       return res.status(400).json({ error: `Invalid size. Valid sizes: ${[...VALID_SIZES].join(', ')}` });
     }
 
-    const color     = req.query.color ?? null;
-    const border    = req.query.border !== 'false';
-    const svgString = buildSvgString(icon, color, border, size);
-    const buffer    = await svgToRaster(svgString, size, 'webp');
+    const color       = req.query.color ?? null;
+    const border      = req.query.border !== 'false';
+    const strokeWidth = resolveStrokeWidth(req.query.strokeWidth);
+    const svgString   = buildSvgString(icon, color, border, size, strokeWidth);
+    const buffer      = await svgToRaster(svgString, size, 'webp');
 
     res.setHeader('Content-Type', 'image/webp');
     res.setHeader('Content-Disposition', `inline; filename="${icon.slug ?? icon.id}-${size}.webp"`);
@@ -477,6 +505,23 @@ app.post('/api/convert', upload.single('file'), async (req, res) => {
     console.error('Conversion Error:', error);
     res.status(500).json({ error: error.message || 'Internal server error during conversion' });
   }
+});
+
+// ─────────────────────────────────────────────
+// ERROR HANDLING
+// ─────────────────────────────────────────────
+
+// Catches errors thrown by middleware (e.g. multer's fileSize limit) before a route
+// handler's own try/catch can run, so every failure still gets the JSON error contract.
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ error: `Upload error: ${err.message}` });
+  }
+  if (err) {
+    console.error('Unhandled error:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+  next();
 });
 
 // ─────────────────────────────────────────────

@@ -9,20 +9,29 @@
 
 /* ── CSS Custom Properties ───────────────────────────────── */
 :root {
-  --bg-primary:    #0A0A0F;
-  --bg-secondary:  #111118;
-  --bg-card:       #131319;
-  --bg-card-hover: #1c1c26;
-  --bg-sidebar:    #0e0e15;
-  --bg-header:     rgba(10, 10, 15, 0.90);
+  /* Obsidian surface scale — flat, near-black, no blue/purple cast */
+  --bg-primary:    #0A0A0B;
+  --bg-secondary:  #101012;
+  --bg-card:       #16161A;
+  --bg-card-hover: #1D1D22;
+  --bg-sidebar:    #0D0D0F;
+  --bg-header:     rgba(10, 10, 11, 0.88);
 
-  --text-primary:   #F0F0FF;
-  --text-secondary: #8888AA;
-  --text-muted:     #44445A;
+  --text-primary:   #F3F3F5;
+  --text-secondary: #9C9CA6;
+  --text-muted:     #5B5B64;
 
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-medium: rgba(255, 255, 255, 0.10);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.12);
 
+  /* Brand accent — dark orange, used sparingly for primary actions & highlights */
+  --accent:         #E8590C;
+  --accent-hover:   #FF7A29;
+  --accent-soft:    rgba(232, 89, 12, 0.14);
+  --accent-border:  rgba(232, 89, 12, 0.35);
+  --accent-ink:     #0A0A0B; /* text color on top of --accent */
+
+  /* Per-icon color palette (product feature, not site chrome) */
   --neon-pink:   #FF2D78;
   --neon-purple: #BE00FF;
   --neon-blue:   #00B4FF;
@@ -34,30 +43,32 @@
   --neon-violet: #7B2FFF;
   --neon-lime:   #AAFF00;
 
-  --scrollbar-track: #0e0e15;
-  --scrollbar-thumb: #2a2a38;
+  --scrollbar-track: #0D0D0F;
+  --scrollbar-thumb: #28282D;
   --transition-fast:   150ms;
   --transition-normal: 250ms;
 }
 
 /* ── Light theme ─────────────────────────────────────────── */
 .light {
-  --bg-primary:    #F0F0F8;
+  --bg-primary:    #FAFAF9;
   --bg-secondary:  #FFFFFF;
   --bg-card:       #FFFFFF;
-  --bg-card-hover: #F4F4FC;
+  --bg-card-hover: #F4F4F3;
   --bg-sidebar:    #FFFFFF;
-  --bg-header:     rgba(240, 240, 248, 0.92);
+  --bg-header:     rgba(250, 250, 249, 0.90);
 
-  --text-primary:   #0F0F1A;
-  --text-secondary: #555570;
-  --text-muted:     #9999BB;
+  --text-primary:   #16161A;
+  --text-secondary: #5C5C64;
+  --text-muted:     #9C9CA6;
 
-  --border-subtle: rgba(0, 0, 0, 0.05);
-  --border-medium: rgba(0, 0, 0, 0.10);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.12);
 
-  --scrollbar-track: #E8E8F0;
-  --scrollbar-thumb: #B8B8CC;
+  --accent-ink: #FFFFFF;
+
+  --scrollbar-track: #F0F0EF;
+  --scrollbar-thumb: #D4D4D2;
 }
 
 /* ── Base reset ─────────────────────────────────────────── */
@@ -80,7 +91,7 @@ body {
 ::-webkit-scrollbar         { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track   { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb   { background: var(--scrollbar-thumb); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* ── Neon card borders ───────────────────────────────────── */
 .neon-border-pink   { border-color: #FF2D78; }
@@ -113,13 +124,19 @@ body {
   font-weight: 500; cursor: pointer; transition: all var(--transition-fast);
   border: none; outline: none; white-space: nowrap;
 }
-.btn-primary { background: var(--neon-blue); color: #000; }
-.btn-primary:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: var(--accent-hover); }
 .btn-ghost {
   background: transparent; color: var(--text-secondary);
   border: 1px solid var(--border-medium);
 }
 .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.btn-secondary {
+  background: var(--bg-card-hover); color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+}
+.btn-secondary:hover { background: var(--bg-card); border-color: var(--accent-border); }
+.btn-pill { border-radius: 999px; padding: 0.625rem 1.25rem; font-weight: 600; }
 
 /* ── Transition helper ───────────────────────────────────── */
 .transition-theme {
@@ -127,5 +144,5 @@ body {
 }
 
 /* ── Focus ──────────────────────────────────────────────── */
-:focus-visible { outline: 2px solid var(--neon-blue); outline-offset: 2px; }
-::selection { background: rgba(0, 180, 255, 0.25); color: var(--text-primary); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: var(--accent-soft); color: var(--text-primary); }

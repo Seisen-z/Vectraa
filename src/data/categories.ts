@@ -182,3 +182,23 @@ export const CATEGORIES: Category[] = [
 
 /** Map for O(1) category lookup */
 export const CATEGORY_MAP = new Map(CATEGORIES.map(c => [c.id, c]));
+
+/** Category ids in fallback distribution order (skips 'all' and 'unique'). */
+const FALLBACK_CATEGORY_IDS = CATEGORIES.map(c => c.id).filter(id => id !== 'all' && id !== 'unique');
+
+/**
+ * Assigns a category to an icon name by matching against each category's
+ * `keywords`. Falls back to a deterministic hash-based distribution across
+ * categories when no keyword matches, so uncategorized icons still spread
+ * evenly instead of piling into one bucket.
+ */
+export function categorizeByKeywords(name: string): string {
+  const n = name.toLowerCase();
+  for (const cat of CATEGORIES) {
+    if (cat.id === 'all') continue;
+    if (cat.keywords.some(kw => n.includes(kw))) return cat.id;
+  }
+  let hash = 0;
+  for (let i = 0; i < n.length; i++) hash += n.charCodeAt(i);
+  return FALLBACK_CATEGORY_IDS[hash % FALLBACK_CATEGORY_IDS.length];
+}

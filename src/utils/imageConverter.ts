@@ -10,6 +10,7 @@ import { jsPDF } from 'jspdf';
 import { initializeImageMagick, ImageMagick, MagickFormat } from '@imagemagick/magick-wasm';
 // @ts-ignore
 import magickWasmUrl from '@imagemagick/magick-wasm/magick.wasm?url';
+import { wrapPngAsIco } from './ico';
 
 // ── INIT PDF WORKER (Safest CDN approach for Vite) ──
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -130,19 +131,31 @@ export async function convertImage(file: File, targetFormat: string): Promise<Bl
     return result as Blob;
   }
 
-  // 5. ImageMagick Pipeline (PSD, RAW, TIFF, EXR, etc)
-  if (MAGICK_FORMATS.includes(sourceExt)) {
+  // 5. ImageMagick Pipeline (PSD, RAW, TIFF, EXR, etc) — routes on source OR target format,
+  // since converting TO a Magick-only format (e.g. PNG -> PSD) needs this pipeline too.
+  if (MAGICK_FORMATS.includes(sourceExt) || MAGICK_FORMATS.includes(targetExt)) {
     await initMagick();
     const arrayBuffer = await file.arrayBuffer();
-    
-    let mFormat: MagickFormat = MagickFormat.Png;
-    if (targetExt === 'jpg' || targetExt === 'jpeg') mFormat = MagickFormat.Jpeg;
+
+    let mFormat: MagickFormat | null = null;
+    if (targetExt === 'png') mFormat = MagickFormat.Png;
+    else if (targetExt === 'jpg' || targetExt === 'jpeg') mFormat = MagickFormat.Jpeg;
     else if (targetExt === 'webp') mFormat = MagickFormat.WebP;
     else if (targetExt === 'gif') mFormat = MagickFormat.Gif;
     else if (targetExt === 'bmp') mFormat = MagickFormat.Bmp;
     else if (targetExt === 'ico') mFormat = MagickFormat.Ico;
     else if (targetExt === 'tiff' || targetExt === 'tif') mFormat = MagickFormat.Tiff;
-    
+    else if (targetExt === 'psd') mFormat = MagickFormat.Psd;
+    else if (targetExt === 'tga') mFormat = MagickFormat.Tga;
+    else if (targetExt === 'dds') mFormat = MagickFormat.Dds;
+    else if (targetExt === 'exr') mFormat = MagickFormat.Exr;
+
+    // Rather than silently emitting mislabeled PNG bytes for an unmapped target
+    // (e.g. kra, xcf, jxl, raw, dng), fail loudly so the user knows it's unsupported.
+    if (!mFormat) {
+      throw new Error(`Conversion to .${targetExt} is not supported yet.`);
+    }
+
     return new Promise((resolve, reject) => {
       try {
         ImageMagick.read(new Uint8Array(arrayBuffer), (img) => {
@@ -158,43 +171,45 @@ export async function convertImage(file: File, targetFormat: string): Promise<Bl
   }
 
   // 6. Native HTML5 Canvas Pipeline (PNG, JPG, WEBP, SVG, GIF, BMP, ICO)
-  return new Promise((resolve, reject) => {
-    let mimeType = 'image/png';
-    if (targetExt === 'jpg' || targetExt === 'jpeg') mimeType = 'image/jpeg';
-    else if (targetExt === 'webp') mimeType = 'image/webp';
-    else if (targetExt === 'gif') mimeType = 'image/gif'; 
-    else if (targetExt === 'bmp') mimeType = 'image/bmp'; 
-
-    const img = new Image();
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
     const url = URL.createObjectURL(file);
-
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return reject(new Error('Canvas context not available'));
-
-      // If converting to JPG, fill with white background as JPG doesn't support transparency
-      if (mimeType === 'image/jpeg') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      ctx.drawImage(img, 0, 0);
-
-      canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('Canvas toBlob failed'));
-        resolve(blob);
-      }, mimeType, 0.95);
-    };
-
-    img.onerror = () => {
+    image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+    image.onerror = () => {
       URL.revokeObjectURL(url);
       reject(new Error(`Failed to load ${sourceExt.toUpperCase()} natively. Formatting unsupported.`));
     };
-
-    img.src = url;
+    image.src = url;
   });
+
+  const canvas = document.createElement('canvas');
+  // ICO's width/height fields are 1 byte each, so cap the raster at 256px.
+  const scale = targetExt === 'ico' ? Math.min(1, 256 / Math.max(img.width, img.height)) : 1;
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context not available');
+
+  let mimeType = 'image/png';
+  if (targetExt === 'jpg' || targetExt === 'jpeg') mimeType = 'image/jpeg';
+  else if (targetExt === 'webp') mimeType = 'image/webp';
+  else if (targetExt === 'gif') mimeType = 'image/gif';
+  else if (targetExt === 'bmp') mimeType = 'image/bmp';
+
+  // If converting to JPG, fill with white background as JPG doesn't support transparency
+  if (mimeType === 'image/jpeg') {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  const rasterBlob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed')), mimeType, 0.95);
+  });
+
+  if (targetExt === 'ico') {
+    return wrapPngAsIco(rasterBlob, Math.max(canvas.width, canvas.height));
+  }
+  return rasterBlob;
 }

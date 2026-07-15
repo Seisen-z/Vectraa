@@ -19,7 +19,7 @@ const ALL_FORMATS: { value: DownloadFormat; label: string }[] = [
 const SIZED_FORMATS: DownloadFormat[] = ['svg', 'png', 'jpg', 'webp', 'ico'];
 
 export default function IconModal({ entry, onClose }: Props) {
-  const { getIcon, ensureChunksLoaded, iconColor, showBorder } = useIconStore();
+  const { getIcon, ensureChunksLoaded, iconColor, showBorder, borderWidth } = useIconStore();
   const icon      = getIcon(entry.id);
   const neonColor = NEON_HEX[entry.l] ?? '#00B4FF';
   const svgColor  = iconColor || neonColor;
@@ -38,8 +38,8 @@ export default function IconModal({ entry, onClose }: Props) {
   const dl = useCallback(async (size?: PngSize) => {
     if (!icon) return;
     const effectiveBorder = noBorder ? false : showBorder;
-    await downloadIcon(icon, format, size ?? 512, svgColor, effectiveBorder);
-  }, [icon, format, svgColor, showBorder, noBorder]);
+    await downloadIcon(icon, format, size ?? 512, svgColor, effectiveBorder, borderWidth);
+  }, [icon, format, svgColor, showBorder, noBorder, borderWidth]);
 
   const hasSizes = SIZED_FORMATS.includes(format);
 

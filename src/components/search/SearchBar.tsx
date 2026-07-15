@@ -33,7 +33,7 @@ export default function SearchBar() {
         onChange={handleChange}
         placeholder="Search 50,000+ icons…"
         aria-label="Search icons"
-        className="w-full pl-9 pr-28 py-2.5 rounded-xl text-sm font-medium bg-[var(--bg-card)] border border-[var(--border-medium)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--neon-blue)] focus:ring-1 focus:ring-[var(--neon-blue)]/30 transition-all duration-200"
+        className="w-full pl-9 pr-28 py-2.5 rounded-xl text-sm font-medium bg-[var(--bg-card)] border border-[var(--border-medium)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-all duration-200"
       />
       {showCount && (
         <span className="absolute right-10 text-[11px] font-medium text-[var(--text-muted)] whitespace-nowrap">

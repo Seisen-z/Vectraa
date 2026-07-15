@@ -18,10 +18,17 @@ function PlaceholderIcon({ color }: { color: string }) {
 
 const IconCard = memo(({ entry, onOpenModal }: Props) => {
   const [hovered, setHovered] = useState(false);
-  const { selectedIds, toggleSelect, getIcon, iconColor, showBorder } = useIconStore();
+  // Scalar selectors — each only re-renders this card when its own value
+  // actually changes, instead of on every store update (chunk loads, other
+  // cards' selection, etc). This is what keeps color/border changes smooth
+  // across thousands of rendered cards.
+  const isSelected    = useIconStore(s => s.selectedIds.has(entry.id));
+  const toggleSelect  = useIconStore(s => s.toggleSelect);
+  const fullIcon       = useIconStore(s => s.iconsById.get(entry.id));
+  const iconColor      = useIconStore(s => s.iconColor);
+  const showBorder     = useIconStore(s => s.showBorder);
+  const borderWidth    = useIconStore(s => s.borderWidth);
 
-  const isSelected = selectedIds.has(entry.id);
-  const fullIcon   = getIcon(entry.id);
   const neonColor  = NEON_HEX[entry.l] ?? '#00B4FF';
   const svgColor   = iconColor || neonColor;
 
@@ -33,8 +40,8 @@ const IconCard = memo(({ entry, onOpenModal }: Props) => {
   const handleClick = useCallback(() => onOpenModal(entry), [entry, onOpenModal]);
 
   const borderStyle = showBorder
-    ? `1.5px solid ${hovered || isSelected ? svgColor : `${svgColor}50`}`
-    : `1.5px solid ${hovered ? `${svgColor}25` : isSelected ? `${svgColor}40` : 'transparent'}`;
+    ? `${borderWidth}px solid ${hovered || isSelected ? svgColor : `${svgColor}50`}`
+    : `${borderWidth}px solid ${hovered ? `${svgColor}25` : isSelected ? `${svgColor}40` : 'transparent'}`;
 
   const bgStyle = isSelected
     ? `${svgColor}18`

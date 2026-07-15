@@ -332,7 +332,7 @@ function PackageCard({ pkg, onGuide }: { pkg: Pkg; onGuide: () => void }) {
       <div className="flex items-center gap-2 px-5 pb-5 mt-auto">
         <button
           onClick={onGuide}
-          className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[var(--neon-blue)]/15 text-[var(--neon-blue)] border border-[var(--neon-blue)]/25 hover:bg-[var(--neon-blue)]/25 transition-colors"
+          className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] hover:brightness-110 transition-colors"
         >
           API Guide
         </button>
@@ -360,8 +360,8 @@ export default function PackagesView() {
 
         {/* Hero */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--neon-blue)]/10 border border-[var(--neon-blue)]/20 text-[var(--neon-blue)] text-xs font-semibold mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--neon-blue)]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent-soft)] border border-[var(--accent-border)] text-[var(--accent)] text-xs font-semibold mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             REST API · No install required
           </div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-3">Packages</h1>
@@ -376,7 +376,7 @@ export default function PackagesView() {
           <span className="text-xs text-[var(--text-muted)]">Base URL</span>
           <code className="text-xs font-mono text-[var(--neon-cyan)]">{BASE}/api/icons/:name/:format</code>
           <span className="ml-auto text-xs text-[var(--text-muted)]">
-            <button onClick={() => setAppMode('api-docs')} className="hover:text-[var(--neon-blue)] transition-colors">
+            <button onClick={() => setAppMode('api-docs')} className="hover:text-[var(--accent)] transition-colors">
               Full API reference →
             </button>
           </span>

@@ -10,7 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Neon accent palette — used for icon card borders
+        // Brand accent — dark orange, used sparingly for CTAs & highlights
+        accent: {
+          DEFAULT: '#E8590C',
+          hover:   '#FF7A29',
+          soft:    'rgba(232, 89, 12, 0.14)',
+        },
+        // Per-icon color palette — a product feature (icon variety), not site chrome
         neon: {
           pink:   '#FF2D78',
           purple: '#BE00FF',
@@ -23,23 +29,23 @@ const config: Config = {
           violet: '#7B2FFF',
           lime:   '#AAFF00',
         },
-        // Dark theme surface colors
+        // Obsidian dark-theme surface scale
         dark: {
-          900: '#0A0A0F',
-          800: '#111118',
-          700: '#1A1A24',
-          600: '#22222F',
-          500: '#2D2D3D',
-          400: '#3A3A50',
-          300: '#525268',
+          900: '#0A0A0B',
+          800: '#101012',
+          700: '#16161A',
+          600: '#1D1D22',
+          500: '#28282D',
+          400: '#3A3A40',
+          300: '#5B5B64',
         },
         // Light theme surface colors
         light: {
           50:  '#FFFFFF',
-          100: '#F4F4F8',
-          200: '#E8E8F0',
-          300: '#D8D8E8',
-          400: '#B8B8CC',
+          100: '#FAFAF9',
+          200: '#F4F4F3',
+          300: '#E5E5E3',
+          400: '#D4D4D2',
         },
       },
       fontFamily: {

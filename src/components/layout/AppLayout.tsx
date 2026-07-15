@@ -9,11 +9,14 @@ import { useAppStore } from '@/store/useAppStore';
 import ConversionView from '@/components/conversion/ConversionView';
 import ApiDocsView from '@/components/docs/ApiDocsView';
 import PackagesView from '@/components/packages/PackagesView';
+import LandingPage from '@/components/landing/LandingPage';
 
 export default function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { activeAppMode } = useAppStore();
   const { selectedIds, clearSelection } = useIconStore();
+
+  if (activeAppMode === 'landing') return <LandingPage />;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[var(--bg-primary)] transition-theme">
@@ -30,7 +33,7 @@ export default function AppLayout() {
                 {selectedIds.size > 0 && (
                   <button
                     onClick={clearSelection}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--neon-blue)]/10 border border-[var(--neon-blue)]/25 text-xs font-medium text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 transition-colors shrink-0 whitespace-nowrap"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-border)] text-xs font-medium text-[var(--accent)] hover:brightness-110 transition-colors shrink-0 whitespace-nowrap"
                   >
                     {selectedIds.size} selected ✕
                   </button>

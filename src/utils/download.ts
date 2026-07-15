@@ -6,21 +6,25 @@ import { saveAs } from 'file-saver';
 import type { IconEntry, DownloadFormat, PngSize } from '@/data/iconTypes';
 
 import { NEON_HEX } from '@/data/iconTypes';
+import { wrapPngAsIco } from './ico';
 
 // ── Build full SVG string from an icon entry ─────────────────
-export function buildSvgString(icon: IconEntry, colorOverride?: string, showBorder = true, size = 512): string {
+// `borderWidth` is the decorative card-border ring thickness (UI px, ~1.5 default),
+// scaled 2x into the 88-unit border viewBox to match the on-screen ring proportion.
+export function buildSvgString(icon: IconEntry, colorOverride?: string, showBorder = true, size = 512, borderWidth = 1.5): string {
   const color = colorOverride && colorOverride !== 'currentColor' ? colorOverride : (NEON_HEX[icon.color] ?? '#00B4FF');
   const content = icon.svgContent.replace(/currentColor/g, color);
+  const paint = `fill="${color}"`;
 
   if (!showBorder) {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="${size}" height="${size}" fill="${color}">
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="${size}" height="${size}" ${paint}>
   ${content}
 </svg>`;
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="${size}" height="${size}">
-  <rect x="1.5" y="1.5" width="85" height="85" rx="16" fill="none" stroke="${color}" stroke-width="3" />
-  <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" fill="${color}">
+  <rect x="1.5" y="1.5" width="85" height="85" rx="16" fill="none" stroke="${color}" stroke-width="${borderWidth * 2}" />
+  <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" ${paint}>
     ${content}
   </svg>
 </svg>`;
@@ -60,8 +64,8 @@ async function svgToCanvas(svgString: string, size: number): Promise<HTMLCanvasE
 }
 
 // ── SVG → PNG Blob ────────────────────────────────────────────
-export async function svgToPng(icon: IconEntry, size: PngSize, colorOverride?: string, showBorder = true): Promise<Blob> {
-  const svg = buildSvgString(icon, colorOverride, showBorder);
+export async function svgToPng(icon: IconEntry, size: PngSize, colorOverride?: string, showBorder = true, borderWidth = 1.5): Promise<Blob> {
+  const svg = buildSvgString(icon, colorOverride, showBorder, size, borderWidth);
   const canvas = await svgToCanvas(svg, size);
   return new Promise<Blob>((res, rej) =>
     canvas.toBlob(b => b ? res(b) : rej(new Error('PNG conversion failed')), 'image/png')
@@ -69,8 +73,8 @@ export async function svgToPng(icon: IconEntry, size: PngSize, colorOverride?: s
 }
 
 // ── SVG → JPG Blob ────────────────────────────────────────────
-export async function svgToJpg(icon: IconEntry, size: PngSize = 512, colorOverride?: string, showBorder = true): Promise<Blob> {
-  const svg = buildSvgString(icon, colorOverride, showBorder);
+export async function svgToJpg(icon: IconEntry, size: PngSize = 512, colorOverride?: string, showBorder = true, borderWidth = 1.5): Promise<Blob> {
+  const svg = buildSvgString(icon, colorOverride, showBorder, size, borderWidth);
   const canvas = await svgToCanvas(svg, size);
   // Fill background dark for JPG (no transparency)
   const bgCanvas = document.createElement('canvas');
@@ -85,8 +89,8 @@ export async function svgToJpg(icon: IconEntry, size: PngSize = 512, colorOverri
 }
 
 // ── SVG → WebP Blob ───────────────────────────────────────────
-export async function svgToWebP(icon: IconEntry, size: PngSize = 512, colorOverride?: string, showBorder = true): Promise<Blob> {
-  const svg = buildSvgString(icon, colorOverride, showBorder);
+export async function svgToWebP(icon: IconEntry, size: PngSize = 512, colorOverride?: string, showBorder = true, borderWidth = 1.5): Promise<Blob> {
+  const svg = buildSvgString(icon, colorOverride, showBorder, size, borderWidth);
   const canvas = await svgToCanvas(svg, size);
   return new Promise<Blob>((res, rej) =>
     canvas.toBlob(b => b ? res(b) : rej(new Error('WebP conversion failed')), 'image/webp', 0.92)
@@ -94,12 +98,15 @@ export async function svgToWebP(icon: IconEntry, size: PngSize = 512, colorOverr
 }
 
 // ── SVG → ICO ─────────────────────────────────────────────────
-export async function svgToIco(icon: IconEntry, colorOverride?: string, showBorder = true, size: PngSize = 32): Promise<Blob> {
-  const svg = buildSvgString(icon, colorOverride, showBorder, size);
-  const canvas = await svgToCanvas(svg, size);
-  return new Promise<Blob>((res, rej) =>
+export async function svgToIco(icon: IconEntry, colorOverride?: string, showBorder = true, size: PngSize = 32, borderWidth = 1.5): Promise<Blob> {
+  // ICO's width/height fields are 1 byte each, so cap the raster at 256px.
+  const icoSize = Math.min(size, 256);
+  const svg = buildSvgString(icon, colorOverride, showBorder, icoSize, borderWidth);
+  const canvas = await svgToCanvas(svg, icoSize);
+  const pngBlob = await new Promise<Blob>((res, rej) =>
     canvas.toBlob(b => b ? res(b) : rej(new Error('ICO conversion failed')), 'image/png')
   );
+  return wrapPngAsIco(pngBlob, icoSize);
 }
 
 // ── JSON metadata ─────────────────────────────────────────────
@@ -125,31 +132,32 @@ export async function downloadIcon(
   format: DownloadFormat,
   pngSize: PngSize = 512,
   colorOverride?: string,
-  showBorder = true
+  showBorder = true,
+  borderWidth = 1.5
 ): Promise<void> {
   const base = (icon.slug || icon.id).replace(/^(custom|lucide|tabler|phosphor|heroicons|bootstrap|iconoir|material)-/, '');
   switch (format) {
     case 'svg': {
-      saveAs(svgToBlob(buildSvgString(icon, colorOverride, showBorder, pngSize)), `${base}-${pngSize}px.svg`);
+      saveAs(svgToBlob(buildSvgString(icon, colorOverride, showBorder, pngSize, borderWidth)), `${base}-${pngSize}px.svg`);
       break;
     }
     case 'png': {
-      const blob = await svgToPng(icon, pngSize, colorOverride, showBorder);
+      const blob = await svgToPng(icon, pngSize, colorOverride, showBorder, borderWidth);
       saveAs(blob, `${base}-${pngSize}px.png`);
       break;
     }
     case 'jpg': {
-      const blob = await svgToJpg(icon, pngSize, colorOverride, showBorder);
+      const blob = await svgToJpg(icon, pngSize, colorOverride, showBorder, borderWidth);
       saveAs(blob, `${base}-${pngSize}px.jpg`);
       break;
     }
     case 'webp': {
-      const blob = await svgToWebP(icon, pngSize, colorOverride, showBorder);
+      const blob = await svgToWebP(icon, pngSize, colorOverride, showBorder, borderWidth);
       saveAs(blob, `${base}-${pngSize}px.webp`);
       break;
     }
     case 'ico': {
-      const blob = await svgToIco(icon, colorOverride, showBorder, pngSize);
+      const blob = await svgToIco(icon, colorOverride, showBorder, pngSize, borderWidth);
       saveAs(blob, `${base}-${pngSize}px.ico`);
       break;
     }
@@ -165,7 +173,8 @@ export async function bulkDownloadZip(
   icons: IconEntry[],
   onProgress?: (pct: number) => void,
   colorOverride?: string,
-  showBorder = true
+  showBorder = true,
+  borderWidth = 1.5
 ): Promise<void> {
   const zip = new JSZip();
 
@@ -175,7 +184,7 @@ export async function bulkDownloadZip(
     const folder = zip.folder(base)!;
 
     // Always include SVG
-    folder.file(`${base}.svg`, buildSvgString(icon, colorOverride, showBorder));
+    folder.file(`${base}.svg`, buildSvgString(icon, colorOverride, showBorder, 512, borderWidth));
     // JSON metadata
     folder.file(`${base}.json`, JSON.stringify({
       id: icon.id, name: icon.name, category: icon.category,
@@ -186,7 +195,7 @@ export async function bulkDownloadZip(
     // PNG at common sizes (batch to avoid memory spikes)
     for (const size of [32, 128, 512] as PngSize[]) {
       try {
-        const blob = await svgToPng(icon, size, colorOverride, showBorder);
+        const blob = await svgToPng(icon, size, colorOverride, showBorder, borderWidth);
         folder.file(`${base}-${size}px.png`, blob);
       } catch { /* skip if conversion fails */ }
     }

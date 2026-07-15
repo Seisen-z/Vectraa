@@ -1,5 +1,6 @@
 /**
- * useIconStore.ts — v5: no style field in manifest, cleaner filters.
+ * useIconStore.ts — v7: category is a scroll/highlight target in the
+ * "Categories" browse view rather than a hard filter.
  */
 import { create } from 'zustand';
 import type { IconEntry } from '@/data/iconTypes';
@@ -13,6 +14,8 @@ export interface ManifestEntry {
   k:  number;   // chunk index
 }
 
+export type BrowseView = 'all' | 'categories';
+
 interface IconState {
   manifest:         ManifestEntry[];
   iconsById:        Map<string, IconEntry>;
@@ -21,40 +24,43 @@ interface IconState {
   filteredManifest: ManifestEntry[];
   searchQuery:      string;
   activeCategory:   string;
+  browseView:       BrowseView;
+  scrollToCategoryId: string | null;
   isLoading:        boolean;
   loadError:        string | null;
   selectedIds:      Set<string>;
   iconColor:        string;  // global colour override (empty = per-card neon)
   showBorder:       boolean; // global border toggle
+  borderWidth:      number;  // card border ring thickness, in px
 
   loadManifest:         () => Promise<void>;
   ensureChunksLoaded:   (chunks: number[]) => Promise<void>;
   getIcon:              (id: string) => IconEntry | undefined;
   setSearch:            (q: string) => void;
   setCategory:          (cat: string) => void;
+  setBrowseView:        (view: BrowseView) => void;
+  clearScrollToCategory: () => void;
   setIconColor:         (color: string) => void;
   setShowBorder:        (show: boolean) => void;
+  setBorderWidth:       (width: number) => void;
   toggleSelect:         (id: string) => void;
   selectAll:            () => void;
   clearSelection:       () => void;
 }
 
-function applyFilters(manifest: ManifestEntry[], query: string, category: string): ManifestEntry[] {
-  let r = manifest;
-  if (category !== 'all') r = r.filter(i => i.c === category);
-  if (query.trim()) {
-    const q = query.toLowerCase().trim();
-    r = r.filter(i => i.n.toLowerCase().includes(q) || i.c.includes(q));
-  }
-  return r;
+function applyFilters(manifest: ManifestEntry[], query: string): ManifestEntry[] {
+  if (!query.trim()) return manifest;
+  const q = query.toLowerCase().trim();
+  return manifest.filter(i => i.n.toLowerCase().includes(q) || i.c.includes(q));
 }
 
 export const useIconStore = create<IconState>((set, get) => ({
   manifest: [], iconsById: new Map(),
   loadedChunks: new Set(), fetchingChunks: new Set(),
   filteredManifest: [], searchQuery: '', activeCategory: 'all',
+  browseView: 'categories', scrollToCategoryId: null,
   isLoading: false, loadError: null, selectedIds: new Set(),
-  iconColor: '', showBorder: true,
+  iconColor: '', showBorder: true, borderWidth: 1.5,
 
   loadManifest: async () => {
     set({ isLoading: true, loadError: null });
@@ -70,7 +76,7 @@ export const useIconStore = create<IconState>((set, get) => ({
         k:  r.k ?? r.chunk    ?? 0,
       }));
       set({ manifest: icons, filteredManifest: icons, isLoading: false });
-      // Pre-fetch first 4 chunks for instant above-fold rendering
+      // Pre-fetch first chunks for instant above-fold rendering
       const firstChunks = [...new Set(icons.slice(0, 2000).map(m => m.k))];
       get().ensureChunksLoaded(firstChunks);
     } catch (err) {
@@ -103,10 +109,16 @@ export const useIconStore = create<IconState>((set, get) => ({
   },
 
   getIcon:      id    => get().iconsById.get(id),
-  setSearch:    q     => { const {manifest,activeCategory}=get(); set({searchQuery:q,     filteredManifest:applyFilters(manifest,q,activeCategory)}); },
-  setCategory:  cat   => { const {manifest,searchQuery}=get();    set({activeCategory:cat, filteredManifest:applyFilters(manifest,searchQuery,cat)}); },
+  setSearch:    q     => { const {manifest}=get(); set({searchQuery:q, filteredManifest:applyFilters(manifest,q)}); },
+
+  // Sets the highlighted category and asks the grouped grid to scroll to it.
+  setCategory:  cat   => set({ activeCategory: cat, scrollToCategoryId: cat, browseView: 'categories' }),
+  clearScrollToCategory: () => set({ scrollToCategoryId: null }),
+  setBrowseView: view => set({ browseView: view, ...(view === 'all' ? { activeCategory: 'all' } : {}) }),
+
   setIconColor: color => set({ iconColor: color }),
   setShowBorder: show => set({ showBorder: show }),
+  setBorderWidth: width => set({ borderWidth: width }),
 
   toggleSelect:   id  => { const n=new Set(get().selectedIds); n.has(id)?n.delete(id):n.add(id); set({selectedIds:n}); },
   selectAll:      ()  => set(s=>({selectedIds:new Set(s.filteredManifest.map(i=>i.id))})),
