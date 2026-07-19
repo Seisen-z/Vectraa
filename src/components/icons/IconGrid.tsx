@@ -41,52 +41,6 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: {
 });
 Cell.displayName = 'GridCell';
 
-const STYLED_BADGE_IDS = new Set([
-  'custom-badge-star-arrows',
-  'custom-badge-wizard-hat',
-  'custom-badge-shield-lightning',
-  'custom-badge-rune-spellbook',
-  'custom-badge-crossed-swords',
-  'custom-badge-dragon-head',
-  'custom-badge-royal-crown',
-  'custom-badge-archer-bow',
-  'custom-badge-mana-potion',
-  'custom-badge-phoenix-fire',
-  'custom-badge-cyber-shield',
-  'custom-badge-knight-helm',
-  'custom-badge-assassin-daggers',
-  'custom-badge-paladin-hammer',
-  'custom-badge-necro-skull',
-  'custom-badge-crystal-orb',
-  'custom-badge-berserker-axe',
-  'custom-badge-valkyrie-wings',
-  'custom-badge-shadow-ring',
-  'custom-badge-bounty-coin',
-  'custom-badge-arcane-fireball',
-  'custom-badge-holy-shield',
-  'custom-badge-shadow-reaper',
-  'custom-badge-thunder-hammer',
-  'custom-badge-elven-leaf',
-  'custom-badge-phoenix-feather',
-  'custom-badge-stealth-mask',
-  'custom-badge-demon-horns',
-  'custom-badge-celestial-sun',
-  'custom-badge-frozen-ice-shard',
-  'custom-badge-dragon-egg',
-  'custom-badge-valkyrie-helm',
-  'custom-badge-pirate-anchor',
-  'custom-badge-alchemist-flask',
-  'custom-badge-royal-scepter',
-  'custom-badge-navigator-compass',
-  'custom-badge-frost-snowflake',
-  'custom-badge-volcano-eruption',
-  'custom-badge-cosmic-jellyfish',
-  'custom-badge-bonsai-tree',
-  'custom-badge-bullseye-target',
-  'custom-badge-game-controller',
-  'custom-badge-science-flask',
-]);
-
 function BadgesView({ width, height, manifest, onOpenModal, ensureChunksLoaded }: {
   width: number;
   height: number;
@@ -97,7 +51,7 @@ function BadgesView({ width, height, manifest, onOpenModal, ensureChunksLoaded }
   const [filter, setFilter] = useState<string>('all');
 
   const badgeEntries = useMemo(() => {
-    const allBadges = manifest.filter(m => STYLED_BADGE_IDS.has(m.id));
+    const allBadges = manifest.filter(m => m.c === 'badges');
     if (filter === 'rpg') return allBadges.filter(b => b.n.match(/wizard|mage|dragon|swords|archer|bow|potion|helm|knight|paladin|hammer|necro|skull|berserker|axe|valkyrie|crystal|shadow|bounty/i));
     if (filter === 'spells') return allBadges.filter(b => b.n.match(/wizard|spell|rune|potion|phoenix|necro|crystal|shadow/i));
     if (filter === 'combat') return allBadges.filter(b => b.n.match(/sword|shield|dragon|archer|cyber|helm|knight|dagger|hammer|berserker|axe/i));

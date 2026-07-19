@@ -42,11 +42,12 @@ async function main() {
   fs.mkdirSync(OUT_CHUNKS, { recursive: true });
   fs.mkdirSync(OUT_SVG, { recursive: true });
 
+  const badgeIconNames = new Set(BADGE_ICONS.map(ic => ic.name));
   const allSourceIcons = [...BADGE_ICONS, ...CUSTOM_ICONS];
   const rawIcons = allSourceIcons.map(ic => {
     const cleanName = ic.name.replace(/^brand-/, '');
     const slug = slugify(cleanName);
-    const category = ic.name.startsWith('badge-') ? 'badges' : categorizeByKeywords(ic.name);
+    const category = badgeIconNames.has(ic.name) ? 'badges' : categorizeByKeywords(ic.name);
     return {
       id: slugify(`custom-${cleanName}`),
       name: toTitle(cleanName),
