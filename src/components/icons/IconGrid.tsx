@@ -12,6 +12,8 @@ import { useIconStore, type ManifestEntry } from '@/store/useIconStore';
 import IconCard from './IconCard';
 import IconModal from './IconModal';
 
+import BadgeCard from './BadgeCard';
+
 // Card = 72px + 9px label + gaps
 const CELL_W = 96;
 const CELL_H = 104;
@@ -38,6 +40,137 @@ const Cell = memo(({ columnIndex, rowIndex, style, data }: {
   );
 });
 Cell.displayName = 'GridCell';
+
+const STYLED_BADGE_IDS = new Set([
+  'custom-badge-star-arrows',
+  'custom-badge-wizard-hat',
+  'custom-badge-shield-lightning',
+  'custom-badge-rune-spellbook',
+  'custom-badge-crossed-swords',
+  'custom-badge-dragon-head',
+  'custom-badge-royal-crown',
+  'custom-badge-archer-bow',
+  'custom-badge-mana-potion',
+  'custom-badge-phoenix-fire',
+  'custom-badge-cyber-shield',
+  'custom-badge-knight-helm',
+  'custom-badge-assassin-daggers',
+  'custom-badge-paladin-hammer',
+  'custom-badge-necro-skull',
+  'custom-badge-crystal-orb',
+  'custom-badge-berserker-axe',
+  'custom-badge-valkyrie-wings',
+  'custom-badge-shadow-ring',
+  'custom-badge-bounty-coin',
+  'custom-badge-arcane-fireball',
+  'custom-badge-holy-shield',
+  'custom-badge-shadow-reaper',
+  'custom-badge-thunder-hammer',
+  'custom-badge-elven-leaf',
+  'custom-badge-phoenix-feather',
+  'custom-badge-stealth-mask',
+  'custom-badge-demon-horns',
+  'custom-badge-celestial-sun',
+  'custom-badge-frozen-ice-shard',
+  'custom-badge-dragon-egg',
+  'custom-badge-valkyrie-helm',
+  'custom-badge-pirate-anchor',
+  'custom-badge-alchemist-flask',
+  'custom-badge-royal-scepter',
+  'custom-badge-navigator-compass',
+  'custom-badge-frost-snowflake',
+  'custom-badge-volcano-eruption',
+  'custom-badge-cosmic-jellyfish',
+  'custom-badge-bonsai-tree',
+  'custom-badge-bullseye-target',
+  'custom-badge-game-controller',
+  'custom-badge-science-flask',
+]);
+
+function BadgesView({ width, height, manifest, onOpenModal, ensureChunksLoaded }: {
+  width: number;
+  height: number;
+  manifest: ManifestEntry[];
+  onOpenModal: (entry: ManifestEntry) => void;
+  ensureChunksLoaded: (chunks: number[]) => void;
+}) {
+  const [filter, setFilter] = useState<string>('all');
+
+  const badgeEntries = useMemo(() => {
+    const allBadges = manifest.filter(m => STYLED_BADGE_IDS.has(m.id));
+    if (filter === 'rpg') return allBadges.filter(b => b.n.match(/wizard|mage|dragon|swords|archer|bow|potion|helm|knight|paladin|hammer|necro|skull|berserker|axe|valkyrie|crystal|shadow|bounty/i));
+    if (filter === 'spells') return allBadges.filter(b => b.n.match(/wizard|spell|rune|potion|phoenix|necro|crystal|shadow/i));
+    if (filter === 'combat') return allBadges.filter(b => b.n.match(/sword|shield|dragon|archer|cyber|helm|knight|dagger|hammer|berserker|axe/i));
+    if (filter === 'ranks') return allBadges.filter(b => b.n.match(/crown|star|royal|rank|paladin|bounty|valkyrie/i));
+    return allBadges;
+  }, [manifest, filter]);
+
+  useEffect(() => {
+    const chunks = [...new Set(badgeEntries.map(e => e.k))];
+    ensureChunksLoaded(chunks);
+  }, [badgeEntries, ensureChunksLoaded]);
+
+  return (
+    <div style={{ width, height }} className="flex flex-col overflow-y-auto px-4 py-4 space-y-6">
+      {/* Hero Banner */}
+      <div className="relative rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-slate-900/40 border border-purple-500/20 p-6 overflow-hidden shrink-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -z-0 pointer-events-none" />
+        <div className="relative z-10 max-w-2xl">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-xs font-semibold text-purple-300">
+              NEW COLLECTION
+            </span>
+            <span className="text-xs text-[var(--text-muted)] font-mono">
+              {badgeEntries.length} Badges Available
+            </span>
+          </div>
+          <h2 className="text-2xl font-bold text-white tracking-tight mb-1">
+            Badges & Emblems Showcase
+          </h2>
+          <p className="text-xs text-white/75 leading-relaxed">
+            Browse styled pentagon, starburst, and emblem vector badges for gaming roles, class mastery, magic spells, and rank achievements.
+          </p>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {[
+              { id: 'all', label: '🛡️ All Badges' },
+              { id: 'rpg', label: '🧙‍♂️ RPG & Classes' },
+              { id: 'spells', label: '✨ Spells & Runes' },
+              { id: 'combat', label: '⚔️ Combat & Shields' },
+              { id: 'ranks', label: '👑 Ranks & Royal' },
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                  filter === f.id
+                    ? 'bg-[var(--accent)] text-black font-semibold shadow-md'
+                    : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Grid of Badges */}
+      {badgeEntries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--text-muted)]">
+          <p className="text-base font-medium text-[var(--text-primary)]">No badges match this filter</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 pb-12">
+          {badgeEntries.map(entry => (
+            <BadgeCard key={entry.id} entry={entry} onOpenModal={onOpenModal} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type GroupedRow =
   | { type: 'header'; category: Category; count: number }
@@ -139,6 +272,18 @@ export default function IconGrid() {
       <AutoSizer>
         {({ width, height }) => {
           const columnCount = Math.max(1, Math.floor(width / CELL_W));
+
+          if (browseView === 'badges') {
+            return (
+              <BadgesView
+                width={width}
+                height={height}
+                manifest={filteredManifest}
+                onOpenModal={handleOpenModal}
+                ensureChunksLoaded={ensureChunksLoaded}
+              />
+            );
+          }
 
           if (browseView === 'all') {
             const rowCount = Math.ceil(filteredManifest.length / columnCount);

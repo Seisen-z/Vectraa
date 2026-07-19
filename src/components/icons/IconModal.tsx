@@ -37,9 +37,8 @@ export default function IconModal({ entry, onClose }: Props) {
 
   const dl = useCallback(async (size?: PngSize) => {
     if (!icon) return;
-    const effectiveBorder = noBorder ? false : showBorder;
-    await downloadIcon(icon, format, size ?? 512, svgColor, effectiveBorder, borderWidth);
-  }, [icon, format, svgColor, showBorder, noBorder, borderWidth]);
+    await downloadIcon(icon, format, size ?? 512, svgColor, false, borderWidth);
+  }, [icon, format, svgColor, borderWidth]);
 
   const hasSizes = SIZED_FORMATS.includes(format);
 
@@ -52,10 +51,10 @@ export default function IconModal({ entry, onClose }: Props) {
         </button>
 
         {/* Preview */}
-        <div className="flex items-center justify-center py-14 px-8" style={{ background: `radial-gradient(ellipse at center, ${neonColor}20 0%, transparent 70%)` }}>
-          <div className="w-32 h-32 rounded-2xl border-2 flex items-center justify-center" style={{ borderColor: neonColor, boxShadow: `0 0 40px 8px ${neonColor}30` }}>
+        <div className="flex items-center justify-center py-12 px-8" style={{ background: `radial-gradient(ellipse at center, ${neonColor}20 0%, transparent 70%)` }}>
+          <div className="w-32 h-32 rounded-2xl flex items-center justify-center bg-white/[0.03]">
             {icon ? (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox={icon.viewBox} className="w-16 h-16" fill="currentColor" style={{ color: svgColor }} dangerouslySetInnerHTML={{ __html: icon.svgContent }} />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox={icon.viewBox} className="w-20 h-20 drop-shadow-xl" fill="currentColor" style={{ color: svgColor }} dangerouslySetInnerHTML={{ __html: icon.svgContent }} />
             ) : (
               <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: neonColor }} />
             )}
@@ -77,7 +76,7 @@ export default function IconModal({ entry, onClose }: Props) {
 
         {/* Downloads */}
         <div className="px-6 pb-6 space-y-4">
-          {/* Format selector + border toggle */}
+          {/* Format selector */}
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5">Format</p>
@@ -86,7 +85,7 @@ export default function IconModal({ entry, onClose }: Props) {
                   <button
                     key={f.value}
                     onClick={() => setFormat(f.value)}
-                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors"
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg stroke-none transition-colors"
                     style={format === f.value ? {
                       borderColor: neonColor,
                       color: neonColor,
@@ -103,24 +102,6 @@ export default function IconModal({ entry, onClose }: Props) {
               </div>
             </div>
           </div>
-
-          {/* Border toggle */}
-          <label className="flex items-center gap-2 cursor-pointer w-fit select-none">
-            <div
-              onClick={() => setNoBorder(v => !v)}
-              className="w-8 h-4 rounded-full relative transition-colors"
-              style={{ background: noBorder ? `${neonColor}40` : 'rgba(255,255,255,0.1)' }}
-            >
-              <div
-                className="absolute top-0.5 w-3 h-3 rounded-full transition-all"
-                style={{
-                  left: noBorder ? '18px' : '2px',
-                  background: noBorder ? neonColor : 'rgba(255,255,255,0.4)',
-                }}
-              />
-            </div>
-            <span className="text-xs text-[var(--text-secondary)]">Without border</span>
-          </label>
 
           {/* Size buttons or single download */}
           <div>

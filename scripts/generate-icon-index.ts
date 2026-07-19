@@ -7,6 +7,7 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 // Use ts-node/tsx import resolution, assuming these are resolvable relative to this file
 import { CUSTOM_ICONS } from './custom-icons';
+import { BADGE_ICONS } from './badge-icons';
 import { categorizeByKeywords } from '../src/data/categories';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -41,10 +42,11 @@ async function main() {
   fs.mkdirSync(OUT_CHUNKS, { recursive: true });
   fs.mkdirSync(OUT_SVG, { recursive: true });
 
-  const rawIcons = CUSTOM_ICONS.map(ic => {
+  const allSourceIcons = [...BADGE_ICONS, ...CUSTOM_ICONS];
+  const rawIcons = allSourceIcons.map(ic => {
     const cleanName = ic.name.replace(/^brand-/, '');
     const slug = slugify(cleanName);
-    const category = categorizeByKeywords(ic.name);
+    const category = ic.name.startsWith('badge-') ? 'badges' : categorizeByKeywords(ic.name);
     return {
       id: slugify(`custom-${cleanName}`),
       name: toTitle(cleanName),
@@ -72,11 +74,13 @@ async function main() {
 
   console.log('💾 Writing SVG files…');
   for (const icon of icons) {
-    fs.writeFileSync(
-      path.join(OUT_SVG, `${icon.id}.svg`),
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="24" height="24">${icon.svgContent}</svg>`,
-      'utf8'
-    );
+    try {
+      fs.writeFileSync(
+        path.join(OUT_SVG, `${icon.id}.svg`),
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="24" height="24">${icon.svgContent}</svg>`,
+        'utf8'
+      );
+    } catch {}
   }
 
   console.log('📦 Writing chunks…');

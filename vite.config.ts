@@ -10,7 +10,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    watch: {
+      ignored: ['**/public/icons/**'],
+    },
+  },
   build: {
+    emptyOutDir: false,
     // Increase chunk size warning limit for large icon data
     chunkSizeWarningLimit: 2000,
     rollupOptions: {

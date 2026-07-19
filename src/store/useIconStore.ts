@@ -14,7 +14,7 @@ export interface ManifestEntry {
   k:  number;   // chunk index
 }
 
-export type BrowseView = 'all' | 'categories';
+export type BrowseView = 'all' | 'categories' | 'badges';
 
 interface IconState {
   manifest:         ManifestEntry[];
@@ -60,7 +60,7 @@ export const useIconStore = create<IconState>((set, get) => ({
   filteredManifest: [], searchQuery: '', activeCategory: 'all',
   browseView: 'categories', scrollToCategoryId: null,
   isLoading: false, loadError: null, selectedIds: new Set(),
-  iconColor: '', showBorder: true, borderWidth: 1.5,
+  iconColor: '', showBorder: false, borderWidth: 1.5,
 
   loadManifest: async () => {
     set({ isLoading: true, loadError: null });
@@ -114,7 +114,7 @@ export const useIconStore = create<IconState>((set, get) => ({
   // Sets the highlighted category and asks the grouped grid to scroll to it.
   setCategory:  cat   => set({ activeCategory: cat, scrollToCategoryId: cat, browseView: 'categories' }),
   clearScrollToCategory: () => set({ scrollToCategoryId: null }),
-  setBrowseView: view => set({ browseView: view, ...(view === 'all' ? { activeCategory: 'all' } : {}) }),
+  setBrowseView: view => set({ browseView: view, ...(view === 'all' ? { activeCategory: 'all' } : view === 'badges' ? { activeCategory: 'badges' } : {}) }),
 
   setIconColor: color => set({ iconColor: color }),
   setShowBorder: show => set({ showBorder: show }),

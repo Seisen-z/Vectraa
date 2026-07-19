@@ -167,49 +167,95 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
         </div>
 
         {/* ── View ─────────────────────────────────────────── */}
-        <div className="mb-1">
-          <p className="text-base font-bold text-[var(--text-primary)] mb-3">View</p>
-          <div className="flex flex-col gap-3">
+        <div className="mb-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 px-1">View</p>
+          <div className="flex flex-col gap-1.5">
             <button
               onClick={selectAll}
-              className={`text-left text-sm transition-colors ${browseView === 'all' ? 'text-[var(--accent)] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                browseView === 'all'
+                  ? 'bg-[var(--accent)] text-black font-bold shadow-md shadow-[var(--accent)]/20'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
+              }`}
             >
-              All
+              <span className="flex items-center gap-2">✦ All Icons</span>
+              <span className="text-[10px] opacity-75 font-mono">{totalCount.toLocaleString()}</span>
             </button>
+
             <button
               onClick={() => setBrowseView('categories')}
-              className={`text-left text-sm transition-colors ${browseView === 'categories' ? 'text-[var(--accent)] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                browseView === 'categories'
+                  ? 'bg-[var(--accent)] text-black font-bold shadow-md shadow-[var(--accent)]/20'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
+              }`}
             >
-              Categories
+              <span className="flex items-center gap-2">📂 Regular Icons</span>
+            </button>
+
+            <button
+              onClick={() => { setBrowseView('badges'); onMobileClose(); }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                browseView === 'badges'
+                  ? 'bg-[var(--accent)] text-black font-bold shadow-md shadow-[var(--accent)]/20'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
+              }`}
+            >
+              <span className="flex items-center gap-2">🛡️ Badges & Emblems</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wider font-semibold ${browseView === 'badges' ? 'bg-black/20 text-black' : 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]'}`}>
+                New
+              </span>
             </button>
           </div>
-          {browseView === 'all' && (
-            <p className="mt-3 text-[11px] text-[var(--text-muted)]">{totalCount.toLocaleString()} icons total</p>
-          )}
         </div>
 
-        {/* ── Category list — always visible; clicking a category jumps
-             into the grouped view and scrolls to that section ────── */}
-        <nav className="mt-2">
-          {CATEGORIES.filter(c => c.id !== 'all').map(cat => {
-            const isActive = browseView === 'categories' && activeCategory === cat.id;
-            const count = countMap[cat.id] ?? 0;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => selectCategory(cat.id)}
-                title={cat.description}
-                className="relative w-full flex items-center justify-between gap-2 pl-3 pr-1 py-[5px] text-left"
-              >
-                {isActive && <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-[var(--accent)]" />}
-                <span className={`truncate transition-colors ${isActive ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
-                  {cat.label}
-                </span>
-                <span className="text-[11px] tabular-nums text-[var(--text-muted)] shrink-0">{count}</span>
-              </button>
-            );
-          })}
-        </nav>
+        <div className="border-t border-[var(--border-subtle)] my-3" />
+
+        {browseView === 'badges' ? (
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 px-1">Badge Collections</p>
+            <div className="flex flex-col gap-1 mt-2">
+              {[
+                { id: 'all', label: '🛡️ All Badges' },
+                { id: 'rpg', label: '🧙‍♂️ RPG & Classes' },
+                { id: 'spells', label: '✨ Spells & Runes' },
+                { id: 'combat', label: '⚔️ Combat & Shields' },
+                { id: 'ranks', label: '👑 Ranks & Royal' },
+              ].map(b => (
+                <div
+                  key={b.id}
+                  className="px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-white/5 cursor-pointer font-medium"
+                >
+                  {b.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 px-1">Regular Categories</p>
+            <nav className="mt-2">
+              {CATEGORIES.filter(c => c.id !== 'all' && c.id !== 'badges').map(cat => {
+                const isActive = browseView === 'categories' && activeCategory === cat.id;
+                const count = countMap[cat.id] ?? 0;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => selectCategory(cat.id)}
+                    title={cat.description}
+                    className="relative w-full flex items-center justify-between gap-2 pl-3 pr-1 py-[5px] text-left"
+                  >
+                    {isActive && <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-[var(--accent)]" />}
+                    <span className={`truncate transition-colors ${isActive ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
+                      {cat.label}
+                    </span>
+                    <span className="text-[11px] tabular-nums text-[var(--text-muted)] shrink-0">{count}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        )}
       </div>
     </aside>
   );

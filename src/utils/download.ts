@@ -11,20 +11,20 @@ import { wrapPngAsIco } from './ico';
 // ── Build full SVG string from an icon entry ─────────────────
 // `borderWidth` is the decorative card-border ring thickness (UI px, ~1.5 default),
 // scaled 2x into the 88-unit border viewBox to match the on-screen ring proportion.
-export function buildSvgString(icon: IconEntry, colorOverride?: string, showBorder = true, size = 512, borderWidth = 1.5): string {
+export function buildSvgString(icon: IconEntry, colorOverride?: string, showBorder = false, size = 512, borderWidth = 1.5): string {
+  const isBadge = icon.category === 'badges' || icon.id.startsWith('custom-badge-');
   const color = colorOverride && colorOverride !== 'currentColor' ? colorOverride : (NEON_HEX[icon.color] ?? '#00B4FF');
   const content = icon.svgContent.replace(/currentColor/g, color);
-  const paint = `fill="${color}"`;
 
-  if (!showBorder) {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" width="${size}" height="${size}" ${paint}>
+  if (!showBorder || isBadge) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox || '0 0 100 100'}" width="${size}" height="${size}">
   ${content}
 </svg>`;
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="${size}" height="${size}">
   <rect x="1.5" y="1.5" width="85" height="85" rx="16" fill="none" stroke="${color}" stroke-width="${borderWidth * 2}" />
-  <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" ${paint}>
+  <svg x="17" y="17" width="54" height="54" viewBox="${icon.viewBox}" fill="${color}">
     ${content}
   </svg>
 </svg>`;
@@ -132,7 +132,7 @@ export async function downloadIcon(
   format: DownloadFormat,
   pngSize: PngSize = 512,
   colorOverride?: string,
-  showBorder = true,
+  showBorder = false,
   borderWidth = 1.5
 ): Promise<void> {
   const base = (icon.slug || icon.id).replace(/^(custom|lucide|tabler|phosphor|heroicons|bootstrap|iconoir|material)-/, '');
@@ -173,7 +173,7 @@ export async function bulkDownloadZip(
   icons: IconEntry[],
   onProgress?: (pct: number) => void,
   colorOverride?: string,
-  showBorder = true,
+  showBorder = false,
   borderWidth = 1.5
 ): Promise<void> {
   const zip = new JSZip();

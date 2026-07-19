@@ -183,8 +183,8 @@ export const CATEGORIES: Category[] = [
 /** Map for O(1) category lookup */
 export const CATEGORY_MAP = new Map(CATEGORIES.map(c => [c.id, c]));
 
-/** Category ids in fallback distribution order (skips 'all' and 'unique'). */
-const FALLBACK_CATEGORY_IDS = CATEGORIES.map(c => c.id).filter(id => id !== 'all' && id !== 'unique');
+/** Category ids in fallback distribution order (skips 'all', 'unique', and 'badges'). */
+const FALLBACK_CATEGORY_IDS = CATEGORIES.map(c => c.id).filter(id => id !== 'all' && id !== 'unique' && id !== 'badges');
 
 /**
  * Assigns a category to an icon name by matching against each category's
