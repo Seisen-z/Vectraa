@@ -39,6 +39,10 @@ async function main() {
   console.log('║  Custom Handcrafted Icons Only    ║');
   console.log('╚══════════════════════════════════╝\n');
 
+  // Wipe prior output first — otherwise renamed/removed icons leave orphaned
+  // files behind forever, since we only ever write the current icon set.
+  fs.rmSync(OUT_CHUNKS, { recursive: true, force: true });
+  fs.rmSync(OUT_SVG, { recursive: true, force: true });
   fs.mkdirSync(OUT_CHUNKS, { recursive: true });
   fs.mkdirSync(OUT_SVG, { recursive: true });
 
